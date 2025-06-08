@@ -75,29 +75,29 @@
 # #Zgadujemy liczbę jaką wylosował komputer
 # #Program, dopóki nie zgadniemy, daje nam odpowiedzi "za dużo", "za mało", lub "ZGADŁEŚ" jest uda nam się zgadnąć
 # import random #losowanie wartości
-import random
+# import random
 
-MINIMUM = 0
-MAXIMUM = 100
+# MINIMUM = 0
+# MAXIMUM = 100
 
-number = random.randint(MINIMUM, MAXIMUM)
+# number = random.randint(MINIMUM, MAXIMUM)
 
-print(number)
+# print(number)
 
-answer = None #nasza odpowiedź na start pusta
-counter = 0 #licznik tur
+# answer = None #nasza odpowiedź na start pusta
+# counter = 0 #licznik tur
 
-while answer != number:
-    answer = int(input("Zgadnij wylosowaną liczbę: "))
-    counter +=1
+# while answer != number:
+#     answer = int(input("Zgadnij wylosowaną liczbę: "))
+#     counter +=1
 
-    if answer < number:
-        print("Za mało")
-    elif answer > number:
-        print("Za dużo")
+#     if answer < number:
+#         print("Za mało")
+#     elif answer > number:
+#         print("Za dużo")
 
-print(f"Udało Ci sie zgadnąć liczbę: {number}")
-print(F"Liczba prób: {counter}")
+# print(f"Udało Ci sie zgadnąć liczbę: {number}")
+# print(F"Liczba prób: {counter}")
 
 
 #PĘTLA NIESKOŃCZONA
@@ -155,10 +155,10 @@ import time
 
 
 
-#Zadanie "Logowanie"
-#Użytkownik musi podać poprawnie po kolei: PIN, rok_urodzenia, haslo
-#Jeżeli jakiekolwiek dane zostaną podane źle, program zaczyna się od nowa
-#Dopiero jeśli wszytskie dane zostaną podane poprawnie to pętla się kończy i daje komunikat o zalogowaniu
+# #Zadanie "Logowanie"
+# #Użytkownik musi podać poprawnie po kolei: PIN, rok_urodzenia, haslo
+# #Jeżeli jakiekolwiek dane zostaną podane źle, program zaczyna się od nowa
+# #Dopiero jeśli wszytskie dane zostaną podane poprawnie to pętla się kończy i daje komunikat o zalogowaniu
 
 # PIN = "2345"
 # YEAR_OF_BIRTH = "2005"
