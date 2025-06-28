@@ -289,15 +289,17 @@ lista_danych = [Ludzie]
 
 # CZY ELEMENT ZNAJDUJE SIE W LIŚCIE?
 
-# liczby = [5, 6, -7, 5.23, 0.1]
+liczby = [5, 6, -7, 5.23, 0.1]
 
-# if 2 in liczby:
-#     # Kod wykonywany, jeśli dwójka znajduje się w liście
+if 2 in liczby:
+    # Kod wykonywany, jeśli dwójka znajduje się w liście
 
-#     pass
-# if 5 not in liczby:
-#     # Kod wykonywany, jeśli piątka nie znajduje się w liście
-#     pass
+    pass
+
+
+if 5 not in liczby:
+    # Kod wykonywany, jeśli piątka nie znajduje się w liście
+    pass
 
 
 # Zadanie "Bez powtórzeń"
@@ -322,16 +324,16 @@ lista_danych = [Ludzie]
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-# TWORZENIE NAPISU Z LISTY NAPISÓW .join()
+# # TWORZENIE NAPISU Z LISTY NAPISÓW .join()
 
-# napis_typu_str_lub_cudzysłów.join(lista_elementów)
+# # napis_typu_str_lub_cudzysłów.join(lista_elementów)
 
-# 1.
-# slowa = ['Ala', 'ma', 'kota']
-# tekst = ' '.join(slowa)
-# print(tekst)
+# # 1.
+# # slowa = ['Ala', 'ma', 'kota']
+# # tekst = ' ....'.join(slowa)
+# # print(tekst)
 
-# 2.
+# # 2.
 # przecinek = ", "
 
 # imiona = ['Tomek', 'Ola', 'Zuzia', 'Paweł']

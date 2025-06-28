@@ -1,3 +1,5 @@
+# https://github.com/Miszel16/Niedziela_11_45
+
 #PRZYPOMNIENIE INFORMACJI Z OSTATNICH LEKCJI
 
 #1. Funkcje input() i print()
@@ -5,6 +7,7 @@
 #2. Rodzaje zmiennych i sposób ich zapisu
 
 #3. Rodzaje komentarzy
+
 
 #4. Zasady nazywania zmiennych:
 #   - mogą być małe i duze litery, cyfry oraz '_'
@@ -14,69 +17,46 @@
 
 #5. Funkcja len()
 
-
-
-
-
-
-
-
-
-
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 # # #KONSTRUKCJA IF
-# #(wcięcia w kodzie)
+#(wcięcia w kodzie)
 # wynik_warunku = True
 
-# # if wynik_warunku:
-# #     print('Warunek jest spełniony, dlatego wypisuję to zdanie.')
 
-# # print('Jestem niezależnym zdaniem od warunku.')
+# if wynik_warunku:
+#     print('Warunek jest spełniony, dlatego wypisuję to zdanie.')
+#     print()
 
-# #Pusta instrukcja
+# print('Jestem niezależnym zdaniem od warunku.')
+
+#Pusta instrukcja
 # if wynik_warunku:
 #     pass
 
-
-
+# print("jsdfh")
 
 
 
 # #PRZYKŁAD
 # wiek = int(input('Podaj swój wiek: '))
+
 # if wiek < 18:
 #     print(f'Masz {wiek} lat, czyli jesteś niepełnoletni.')
-
 
 
 
 #Zadanie 1 "Dzielenie"
 #Program obliczający wynik z dzielenia, 
 # ale z zabezpieczeniem dzielenia przez zero (dzielna/dzielnik)
-# dzielna = int(input("Wprowadź dzielną: "))
-# dzielnik = int(input("Wprowadź dzielnik: "))
 
-# #Sprawdzamy czy dzielenie jest możliwy (dzielnik jest rożny od zera)
+# dzielna = int(input("Podaj dzielną: "))
+# dzielnik = int(input("Podaj dzielnik: "))
+
 # if dzielnik != 0:
-#     wynik = dzielna/dzielnik
-#     print(f'{dzielna}/{dzielnik} = {wynik}')
+#     print(dzielna/dzielnik)
 
-# #Jeśli dzielnik jest równy zero to nie można dzielić
-# if dzielnik == 0:
-#     print("NIe można dzielić przez 0")
-
-
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# #Sprawdzamy czy dzielenie jest możliwy (dzielnik jest rożny od zera)
-# if dzielnik != 0:
-#     wynik = dzielna/dzielnik
-#     print(f'Wynik z dzielenia: {wynik}')
-
-# #Jeśli dzielnik jest równy zero to nie można dzielić
-# if dzielnik == 0:
-#     print('Nie wolno dzielić przez 0!')
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 # #KONSTRUKCJA IF-ELSE
 # wynik_warunku = False
@@ -90,52 +70,41 @@
 
 # #PRZYKŁAD 
 # wiek = int(input('Podaj swój wiek: '))
+
 # if wiek < 18:
 #     print(f'Masz {wiek} lat, czyli jesteś niepełnoletni.')
 # else:
 #     print(f'Masz {wiek} lat, czyli jesteś pełnoletni.')
 
 
-# # #Zadanie 1 - ale lepiej
-# # #Program obliczający wynik z dzielenia, ale z zabezpieczeniem dzielenia pzrze zero (dzielna/dzielnik)
-# dzielna = int(input("Wprowadź dzielną: "))
-# dzielnik = int(input("Wprowadź dzielnik: "))
+# #Zadanie 1 - ale lepiej
+# #Program obliczający wynik z dzielenia, ale z zabezpieczeniem dzielenia pzrze zero (dzielna/dzielnik)
+# dzielna = int(input("Podaj dzielną: "))
+# dzielnik = int(input("Podaj dzielnik: "))
 
-# #Sprawdzamy czy dzielenie jest możliwy (dzielnik jest rożny od zera)
 # if dzielnik != 0:
-#     wynik = dzielna/dzielnik
-#     print(f'{dzielna}/{dzielnik} = {wynik}')
+#     print(dzielna/dzielnik)
+# else:
+#     print("NIe mozna dzielić przez 0.")
 
-# #Jeśli dzielnik jest równy zero to nie można dzielić
-# if dzielnik == 0:
-#     print("NIe można dzielić przez 0")
-
-
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 
 #Zadanie 2 "Rollercoaster"
-# - minimalny akceptowalny wiek to 12 lat
+# - minimalny akceptowalny wiek to 12 lat #mamy
 # - minimalny akceptowalny wzrost to 130 cm
 # - maksymalny akceptowalny wzrost to 195 cm
 # - jeden zlożony warunek
 # - wykorzystujemy operatory relacyjne i logiczne (and)
 
-#pobieramy wzrost i wiek
+# wiek = int(input("Podaj swój wiek: "))
+# wzrost = int(input("Podaj wzrost: "))
 
-#wiek musi większy lub równy 12 (>=12) (>11)
-#wzrost musi być większy/rowny niż 130 i mniejszy/równy 195
-
-
-# wiek = int(input("podaj wiek"))
-# wzrost = int(input("podaj wzrost"))
-
-# if wiek>=12 and wzrost>=130 and wzrost<=195:
-#     print("Zapraszamy")
+# if wiek >= 12 and 130 <= wzrost <= 195:
+#     print("Możesz zjechać na rollercoasterze!")
 # else:
-#     print("Nie można")     
-
-
-
+#     print("Niestety nie spełniasz warunków bezpieczeństwa")
+   
 
 
 
@@ -146,91 +115,106 @@
 # #Liczbę meczy wygranych, przegranych oraz liczbę odznaczeń MVP należy pobrać od użytkownika
 # #Podpowiedź (lub = or, i = and)
 
-
-
-
-
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 # #KONSTRUKCJA IF-ELIF-ELSE
-wynik_warunku_1 = True
-wynik_warunku_2 = True
+# wynik_warunku_1 = True
+# wynik_warunku_2 = True
 
-if wynik_warunku_1:
-    print('Warunek 1 jest spełniony i koniec.')
-elif wynik_warunku_2:
-    print('Warunek 2 jest spełniony i koniec.')
-else:
-    print('Ani warunek 1 ani 2 nie został spełniony.')
+# if wynik_warunku_1:
+#     print('Warunek 1 jest spełniony i koniec.')
+# elif wynik_warunku_2:
+#     print('Warunek 2 jest spełniony i koniec.')
+# elif wynik_warunku_2:
+#     print('Warunek 2 jest spełniony i koniec.')
+# elif wynik_warunku_2:
+#     print('Warunek 2 jest spełniony i koniec.')
+# else:
+#     print('Ani warunek 1 ani 2 nie został spełniony.')
 
 
 # #Zadanie 3 "Znak liczby"
-# #Jaka liczba całkowita zostałą wprowadzona?
-# #Dodatnia, ujemne, a może 0?
+#Jaka liczba całkowita została wprowadzona?
+#Dodatnia, ujemne, a może 0?
 
-#1. Wprowadzamy liczbe do programu (konwersja)
-#2. if (zmienna mniejsza od 0):
-#       Twoja liczba jest ujemna
-#   elif (czy zmienna równa jest 0):
-#       Zmienna wynosi zero
-#   else:
-#       Zmienna jest dodatnia
+# liczba = int(input("Podaj liczbę: "))
 
-# x = int(input("Podaj liczbę: "))
-
-# if x<0 :
-#     print("Liczba ujemna.")
-# elif x==0 :
-#     print("Liczba jest rowna zero.")
+# if liczba == 0:
+#     print("Twoja liczb wynosi zero.")
+# elif liczba > 0:
+#     print("Twoj liczba jest dodatnia.")
 # else:
-#     print("Liczba jest dodatnia.")
+#     print("Twoja liczba jest ujemna.")
+
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+# Zadanie dodatkowe "Cena atrakcji"
+# Naszym zadaniem jest napisać program, który
+# informuje użytkownika o koszcie atrakcji turystycznej w zależności od miesiąca.
+# Program powinien zapytać o numer miesiąca, a następnie powinien wyświetlić
+
+# informację według poniższej zasady:
+# w styczniu oraz lutym: $150
+# w marcu i kwietniu: $199
+# w maju oraz czerwcu: $249
+# w lipcu, sierpniu oraz wrześniu: $299
+# w październiku: $249
+# w listopadzie oraz grudniu: $199
 
 
 
-#Zadanie 4 "Prosty Kalkulator"
-#Program prosi o podanie liczby a
-#Program prosi o wybór działania wyświetlając dostępne opcje +,-,*,/,%
-#Program prosi o podanie liczby b
-#Obliczenie wyniku dla danej operacji
 
-# from colorama import Fore
-# a = int(input("Podaj liczbę a: "))
+# Zadanie 4 "Prosty Kalkulator"
+# Program prosi o podanie liczby a
+# Program prosi o wybór działania wyświetlając dostępne opcje +,-,*,/,%
+# Program prosi o podanie liczby b
+# Obliczenie wyniku dla danej operacji
 
-# print("+ dodawanie")
-# print("- odejmowanie")
-# print("* mnożenie")
-# print("/ dzielenie")
-# print("% modulo")
+a = float(input("Podaj pierwszą liczbę: "))
 
-# wybor = input("Podaj znak: ")
-# b = int(input("Podaj liczbę b: "))
+print("dodawania - '+'")
+print("mnożenie - '*'")
+print("dzielenie - '/'")
+print("odejmowanie - '-'")
+print("potęgowanie - '**'")
 
-# if wybor == '+':
-#     print(f"{a} + {b} = {a+b}")
-# elif wybor == '-':
-#     print(f"{a} - {b} = {a-b}")
-# elif wybor == '*':
-#     print(f"{a} * {b} = {a*b}")
-# elif wybor == '/':
-#     print(f"{a} / {b} = {a/b}")
-# elif wybor == '%':
-#     print(f"{a} % {b} = {a%b}")
-# else:
-#     print(Fore.RED + "Błąd" + Fore.RESET)
+znak = input("Wybierz działanie: ")
 
-# #MATCH CASE
-# znak = input("Podaj numer: ")
-
-# match znak:
-#     case '1':
-#         print('Wybrano numer 1')
-#     case '2':
-#         print('Wybrano numer 2')
-#     case _:
-#         print('Niepoprawny numer')
-
-# #Zadanie 4 "Prosty Kalkulator" - ale lepsze
+b = float(input("Podaj drugą liczbę: "))
 
 
+if znak == '+':
+    print(f"{a} {znak} {b} = {a+b}")
+elif znak == '*':
+    print(f"{a} {znak} {b} = {a*b}")
+elif znak == '/':
+    print(f"{a} {znak} {b} = {a/b}")
+elif znak == '-':
+    print(f"{a} {znak} {b} = {a-b}")
+elif znak == '**':
+    print(f"{a} {znak} {b} = {a**b}")
+else:
+    print("Podano niepoprawny znak.")
+    pass
+
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+# MATCH CASE
+znak = input("Podaj numer: ")
+
+match znak:
+    case '+':
+        print('Wybrano numer 1')
+    case '-':
+        print('Wybrano numer 2')
+    case _:
+        print('Niepoprawny numer')
+
+# Zadanie 4 "Prosty Kalkulator" - ale lepsze
+
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 #Zadanie domowe dla chętnych za plusa:
 '''
