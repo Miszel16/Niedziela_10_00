@@ -155,7 +155,7 @@ def powitanie():
 # # Znak '#' oznacza wykonaną część
 # # Znak '-' oznacza niewykonaną część
 
-# # [####------] - chcemy otrzymać równo 10 znaków
+# [####------] - chcemy otrzymać równo 10 znaków
 # def pasek_ladowania(gotowe, wszystko=100):
 #     wykonane = round(gotowe * 10 / wszystko) #zaokrąglenie do najbliższej liczby całkowitej
 #     niewykonane = 10 - wykonane
@@ -219,7 +219,7 @@ def powitanie():
 # pole = pole_szesciokota_foremnego_z_return(2)
 # print(pole)
 
-# #---------------------------------------
+# # #---------------------------------------
 
 # def pole_szesciokota_foremnego_bez_return(a):
 #     print(3 * sqrt(3) * a ** 2 / 2)
