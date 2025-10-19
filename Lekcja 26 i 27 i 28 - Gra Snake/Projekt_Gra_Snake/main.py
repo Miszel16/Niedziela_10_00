@@ -11,6 +11,8 @@ import random
 import time
 # nazwa pliku    nazwa klasy
 from Apple import Apple
+from Direction import Direction
+from Snake import Snake
 pygame.init()
 
 SCREEN_WIDTH = 800
@@ -37,6 +39,14 @@ apple_group = pygame.sprite.Group()
 apple_group.add(apple)
 
 
+snake = Snake()
+# tworzymy nowe zdarzenie
+MOVE_THE_SNAKE = pygame.USEREVENT + 1
+# uruchamiamy je co 200 ms
+pygame.time.set_timer(MOVE_THE_SNAKE, 200)
+
+
+
 # PĘTLA GRY
 game_status = True
 while game_status:
@@ -47,9 +57,12 @@ while game_status:
         pass
 
     screen_surface.blit(background, (0,0)) # wyświetlanie tła
-    
+
     for apple in apple_group:
         screen_surface.blit(apple.image, apple.rect)
+    
+    screen_surface.blit(snake.image, snake.rect)
+
 
     pygame.display.flip() # pełen odświeżenie całego ekranu
     clock.tick(30)
