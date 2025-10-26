@@ -54,15 +54,41 @@ while game_status:
     for event in events:
         if event.type == pygame.QUIT:
             game_status = False
+        
+        if event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_w:
+                snake.change_direction(Direction.UP)
+            if event.key == pygame.K_a:
+                snake.change_direction(Direction.LEFT)
+            if event.key == pygame.K_s:
+                snake.change_direction(Direction.DOWN)
+            if event.key == pygame.K_d:
+                snake.change_direction(Direction.RIGHT)
+        elif event.type == MOVE_THE_SNAKE:
+            snake.update()
         pass
+    
+    collision_with_apple = pygame.sprite.spritecollideany(snake, apple_group)
+    if collision_with_apple != None:
+        collision_with_apple.kill()
+        snake.eat_apple()
+        apple = Apple()
+        apple_group.add(apple)
+
 
     screen_surface.blit(background, (0,0)) # wyświetlanie tła
+    screen_surface.blit(snake.image, snake.rect)
+
+    snake.draw_segments(screen_surface)
+
 
     for apple in apple_group:
         screen_surface.blit(apple.image, apple.rect)
-    
-    screen_surface.blit(snake.image, snake.rect)
 
+    # ----------- kolizja ze ścianami oraz z ogonem węża -------------
+    if snake.detect_collision():
+        game_status = False
+    # ----------------------------------------------------------------
 
     pygame.display.flip() # pełen odświeżenie całego ekranu
     clock.tick(30)

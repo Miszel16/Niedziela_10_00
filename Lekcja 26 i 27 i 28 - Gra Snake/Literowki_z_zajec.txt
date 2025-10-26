@@ -1,0 +1,22 @@
+Literówki z dzisiejszych zajęć:
+
+1. Plik Segment.py
+było: super.__init__()
+powinno być: super().__init__()
+
+
+2. Plik Snake.py metoda update()
+było: new_position = copy.deepcopy(self.segments[i-1].position)
+powinno być: new_position = copy.deepcopy(self.segments[-1].position)
+
+Nasz Snake powinien teraz ładnie rosnąć :) Projekt w pełni działa
+
+W pliku na githubie są dostępne instrukcje jak dalej można rozwinąć projekt,
+zachęcam zajrzeć:
+- kolizja ze ścianami oraz z ogonem węża (modyfikacja pliku Snake.py oraz main.py)
+- zliczanie punktów
+- napis o przegranej
+
+
+W folderze z dzisiejszych zajęć znajdują się już pliki z poprawionymi literówkami 
+oraz z detekcją kolizja ze ścianami oraz z ogonem węża z komentarzami tłumaczącymi funkcję
