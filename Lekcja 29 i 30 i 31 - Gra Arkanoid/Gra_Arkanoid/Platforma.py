@@ -37,3 +37,4 @@ class Platforma(pygame.sprite.Sprite):
 
     def aktualizuj(self):
         self.porusza_sie = 0 
+        
