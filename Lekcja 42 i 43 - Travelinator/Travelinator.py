@@ -25,9 +25,9 @@ def check_coordinates(city, API_KEY):
     pprint(response.json())
     lat = response.json()[0]['lat'] # szerokość geograficzna
     lon = response.json()[0]['lon'] # długość geograficzna
-    city = response.json()[0]['name']
+    #city = response.json()[0]['name']
     country = response.json()[0]['country']
-    return lat, lon, city, country
+    return lat, lon, country # [!]
 
 
 
@@ -44,21 +44,97 @@ def get_weather_info(lat, lon, API_KEY):
     return weather, temperature, pressure, humidity
 
 
-print("Witaj, jestem Travelinator, twój inteligentny asystent podróży")
+# Dokumentacja API - kraje i waluta:
+# # https://restcountries.com/
+# https://pl.wikipedia.org/wiki/ISO_3166-1 - kody krajów
+def get_country_full_name(country_code):
+    url = f"https://restcountries.com/v3.1/alpha/{country_code.upper()}"
+    try:
+        response = requests.get(url)
+        country_name = response.json()[0]['name']['common']
+    except:
+        return country_code
+    else:
+        return country_name
 
-org_city = input("Podaj nazwę miasta, z którego podróżujesz: ")
-org_lat, org_lon, org_city, org_country = check_coordinates(org_city, API_KEY)
 
-desc_city = input("Podaj nazwę miasta, do którego podróżujesz: ")
-desc_lat, desc_lon, desc_city, desc_country = check_coordinates(desc_city, API_KEY)
+def get_currency_code(country_code):
+    url = f"https://restcountries.com/v3.1/alpha/{country_code.upper()}"
+    response = requests.get(url)
+    currency_code = list(response.json()[0]['currencies'].keys())[0]
+    return currency_code
 
-print(f"Miasto z ktorego podróżujesz: {org_city}")
-print(f"Miasto do ktorego podróżujesz: {desc_city}")
-print(f"Współrzędne miasta docelowego to:\n{desc_lat} szerokosci geograficznej i \n{desc_lon} długości geograficznej")
 
-weather, temperature, pressure, humidity = get_weather_info(desc_lat,desc_lon, API_KEY)
+def print_weather_info(place):
+    lat, lon, _ = check_coordinates(place, API_KEY)
+    weather, temperature, pressure, humidity = get_weather_info(lat, lon, API_KEY)
+    print(f"Pogoda dla miasta {place}: {weather}")
+    print(f"Temperatura: {round(temperature - 273.15)} st. Celcjusza")
+    print(f"Ciśnienie: {pressure} hPa")
+    print(f"Wilgotność: {humidity} %")
 
-print(f"Pogoda : {weather}")
-print(f"Temperatura: {round(temperature - 273.15)} st.Celcjusza")
-print(f"wilgotność: {humidity}%")
-print(f"ciśnienie atmosferyczne {pressure}hPa")
+
+
+origin_place = None
+destination_place = None
+
+while True:
+    print('''Jaką akcję chcesz wykonać?
+          1. Podaj/zmień miejsce startowe
+          2. Podaj/zmień miejsce docelowe
+          3. Sprawdź lokalizację miejsca startowego
+          4. Sprawdź lokalizację miejsca docelowego
+          5. Sprawdź pogodę miejsca startowego
+          6. Sprawdź pogodę mijesca docelowego
+          7. Dowiedz się o walucie
+          8. Koniec''')
+    
+    option = int(input())
+
+    if option == 1:
+        origin_place = input("Podaj miasto startowe.\n")
+
+    elif option == 2:
+        destination_place = input("Podaj miasto docelowe.\n")
+
+    elif option == 3:
+        if origin_place is not None:
+            lat, lon, country = check_coordinates(origin_place, API_KEY)
+            country_name = get_country_full_name(country)
+            print(f'''Miasto {origin_place} lezy w kraju {country_name}\n 
+                  Długość geogrficzna: {lon}, szerokość geograficzna: {lat}''')
+        else:
+            print("Najpierw musisz podać miasto startowe")
+
+    elif option == 4:
+        if destination_place is not None:
+            lat, lon, country = check_coordinates(destination_place, API_KEY)
+            country_name = get_country_full_name(country)
+            print(f'''Miasto {destination_place} lezy w kraju {country_name}\n 
+                  Długość geogrficzna: {lon}, szerokość geograficzna: {lat}''')
+        else:
+            print("Najpierw musisz podać miasto docelowe")
+
+    elif option == 5:
+        if origin_place is not None:
+            print_weather_info(origin_place)
+        else:
+            print("Najpierw musisz podać miasto startowe")
+
+    elif option == 6:
+        if destination_place is not None:
+            print_weather_info(destination_place)
+        else:
+            print("Najpierw musisz podać miasto docelowe")
+
+    elif option == 7:
+        print("W budowie...")
+        
+        pass
+
+    elif option == 8:
+        quit()
+    else:
+        print("Podano błędną opcję")
+    print("Naciśnij enter, aby kontynuować...")
+    input()
