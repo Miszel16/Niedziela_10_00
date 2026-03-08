@@ -1,6 +1,10 @@
 import json
-import pprint
 import time
+import smtplib
+import os
+import dotenv
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
 
 with open('menu.json', 'r', encoding='utf-8') as file:
     menu = json.load(file)
@@ -15,6 +19,28 @@ for pizza in pizzas_full_info:
 
 # print(list_of_pizzas_name)
 # ---------------------------------------------------------
+
+def send_email(message_text):
+    dotenv.load_dotenv()
+
+    subject = "Pizzeria u Vita - potwierdzenie zamowienia"
+
+    sender_email = os.getenv('sender_email')
+    recipient_email = os.getenv('recipient_email')
+    sender_password = os.getenv('sender_password')
+
+    message = MIMEMultipart()
+    message['Subject'] = subject
+    message['From'] = sender_email
+    message['To'] = recipient_email
+    body_part = MIMEText(message_text)
+    message.attach(body_part)
+
+    with smtplib.SMTP("smtp.wp.pl", 587, timeout=20) as server:
+        server.starttls()
+        server.login(sender_email, sender_password)
+        server.sendmail(sender_email, recipient_email, message.as_string())
+
 
 def display_menu():
     for index, pizza in enumerate(pizzas_full_info):
@@ -62,7 +88,7 @@ def send_order():
         total_cost += cost
     tekst += f"Łączny koszt: {total_cost}zł"
     print(tekst)
-
+    send_email(tekst) #!!!!!!!!!!!!!
     print("Zamówienie zostało złożone")
     input("Wciśnij Enter, aby kontynuować")
 # ---------------------------------------------------------
