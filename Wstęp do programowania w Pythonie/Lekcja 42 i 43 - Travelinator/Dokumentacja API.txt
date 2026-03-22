@@ -1,0 +1,17 @@
+# Dokumentacja API - pozyskanie geolokalizacji: 
+# https://openweathermap.org/api/geocoding-api?collection=other
+
+
+
+# Dokumentacja API - pozyskanie pogody:
+# https://openweathermap.org/current?collection=current_forecast
+
+
+
+# Dokumentacja API - kraje i waluta:
+# # https://restcountries.com/
+# https://pl.wikipedia.org/wiki/ISO_3166-1 - kody krajów
+
+
+# Dokumentacja API (NBP) - kursy walut
+# https://api.nbp.pl/#info.

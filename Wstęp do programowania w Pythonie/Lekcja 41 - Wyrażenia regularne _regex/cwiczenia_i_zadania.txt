@@ -1,0 +1,75 @@
+#----------------------------------------------------------------------------
+# ĆWICZENIA
+#----------------------------------------------------------------------------
+
+#1 Sprawdz czy w tekscie "Uczę się programowania w języku python3" występuje cyfra
+sentence = "Uczę się programowania w języku python3"
+
+
+#2 Znajdź wszystkie daty w zdaniu 
+# "Juliusz Słowacki herbu Leliwa (ur. 4 września 1809 w Krzemieńcu, zm. 3 kwietnia 1849 w Paryżu[1])
+# – polski poeta, dramaturg i epistolograf. Obok Adama Mickiewicza i Zygmunta Krasińskiego określany 
+# jako jeden z polskich wieszczów narodowych. Twórca filozofii genezyjskiej (pneumatycznej), 
+# epizodycznie związany z mesjanizmem polskim, był też mistykiem. 
+# Obok Adama Mickiewicza uznawany powszechnie za największego przedstawiciela polskiego romantyzmu."
+sentence = "Juliusz Słowacki herbu Leliwa (ur. 4 września 1809 w Krzemieńcu, zm. 3 kwietnia 1849 w Paryżu[1]) " \
+"– polski poeta, dramaturg i epistolograf. Obok Adama Mickiewicza i Zygmunta Krasińskiego określany " \
+"jako jeden z polskich wieszczów narodowych. Twórca filozofii genezyjskiej (pneumatycznej), " \
+"epizodycznie związany z mesjanizmem polskim, był też mistykiem. Obok Adama Mickiewicza uznawany " \
+"powszechnie za największego przedstawiciela polskiego romantyzmu."
+
+
+
+#3 Zamień wszystkie lata z tekstu wyżej na rok 2137.
+pattern = r"\d{4}"
+
+
+
+#4 Znajdź wszystkie daty w formacie  DD-MM-YYYY z tekstu "Dzisiaj jest 20-10-2024, a jutro będzie 21-10-2024."
+sentence = "Dzisiaj jest 20-10-2024, a jutro będzie 21-10-2024."
+
+
+
+#5 Znajdź liczby nieparzyste spośród podanych
+sentence = "Podane liczby to 5 12 442 321 45 20 77"
+
+
+
+#6 Znajdź wszystkie wyrazy zawierające przynajmniej 3 samogłoski
+sentence = "start script level loop debug player server tournament map speedrun quest socket"
+
+
+
+#7 Znajdź wszystkie słowa zaczynające się na literę 's' i kończące na literę 't'
+sentence = "start script level loop debug player server tournament map speedrun quest socket"
+
+
+
+#----------------------------------------------------------------------------
+# ZADANIA
+#----------------------------------------------------------------------------
+https://drive.google.com/file/d/1ILqEGuZJPfuM3kdrfWs1BijGP3rfH3Im/view?usp=sharing
+
+with open("dane.txt", "r", encoding='utf-8') as file:
+    data = file.read()
+#print(data)
+
+#1. Znajdź wszystkie adresy email
+
+
+#2. Znajdź wszystkie osoby zaproszone na spotkania (Imie + Nazwisko)
+
+
+#3. Znajdź wszystkie numery telefonów
+
+
+#4. Zamień wszystkie numery telefonów na xxx - xxx - xxx
+
+
+#5. Znajdź pierwszą datę 
+
+
+#6. Znajdź wszystkie godziny o których rozpoczynają się spotkania
+
+
+#7. Sprawdź ile spotkań zostało zaplanowanych
