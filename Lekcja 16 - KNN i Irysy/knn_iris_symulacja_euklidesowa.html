@@ -1,0 +1,568 @@
+<!doctype html>
+<html lang="pl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Symulacja KNN – Iris</title>
+<style>
+:root{--bg:#09101f;--card:#121d33;--line:#2a3b60;--text:#eef4ff;--muted:#aab7d0;--a:#e45b5b;--b:#278bc1;--c:#e8b719;--accent:#8db8ff}
+*{box-sizing:border-box} body{margin:0;background:radial-gradient(circle at 10% 0,#182c57 0,transparent 32rem),var(--bg);color:var(--text);font-family:Inter,system-ui,Segoe UI,sans-serif}
+.wrap{width:min(1450px,96vw);margin:auto;padding:26px 0 40px} h1{margin:0 0 8px;font-size:clamp(30px,4vw,48px)} .lead{color:var(--muted);max-width:980px;line-height:1.55;margin:0 0 20px}
+.grid{display:grid;grid-template-columns:minmax(0,1fr) 350px;gap:18px;align-items:start}.card{background:linear-gradient(180deg,#14213a,#0e182b);border:1px solid #2a3b60;border-radius:20px;box-shadow:0 18px 55px #0007}.plot{padding:14px}.canvasbox{position:relative;aspect-ratio:16/10;min-height:520px;background:#f7f9fd;border-radius:15px;overflow:hidden}canvas{width:100%;height:100%;display:block;cursor:crosshair}.tip{position:absolute;left:12px;top:12px;background:#fffffff0;color:#17233b;padding:8px 11px;border-radius:10px;font-size:13px;pointer-events:none;box-shadow:0 6px 18px #0002}
+.side{display:grid;gap:14px}.panel{padding:17px}h2{font-size:18px;margin:0 0 12px}label{display:block;color:var(--muted);font-size:13px;font-weight:700;margin:13px 0 7px}select,button{width:100%;padding:10px 11px;border-radius:10px;border:1px solid var(--line);background:#0c1527;color:var(--text);font:inherit}button{cursor:pointer;margin-top:13px}.slider{display:grid;grid-template-columns:1fr 56px;gap:10px;align-items:center}.slider input{width:100%;accent-color:var(--accent)}.kval{background:#0c1527;border:1px solid var(--line);border-radius:10px;text-align:center;padding:7px;font-size:21px;font-weight:800;color:#ffd367}.checks{display:grid;gap:8px;margin-top:13px}.check{display:flex;align-items:center;gap:8px;color:var(--text);font-size:14px;margin:0}.check input{accent-color:var(--accent)}
+.legend{display:grid;gap:8px;margin-top:13px}.li{display:flex;gap:9px;align-items:center;color:var(--muted);font-size:14px}.dot{width:12px;height:12px;border-radius:50%;border:2px solid #fff9}.result{font-size:24px;font-weight:850;line-height:1.2}.small{color:var(--muted);font-size:13px;line-height:1.5;margin-top:7px}.votes{display:grid;gap:8px;margin-top:13px}.vrow{display:grid;grid-template-columns:86px 1fr 26px;gap:8px;align-items:center;font-size:13px}.bar{height:9px;border:1px solid var(--line);background:#091325;border-radius:99px;overflow:hidden}.fill{height:100%}.metric{margin-top:13px;padding-top:12px;border-top:1px solid var(--line);display:flex;justify-content:space-between;gap:10px;color:var(--muted);font-size:13px}.metric b{color:#6bdd9c}
+@media(max-width:1050px){.grid{grid-template-columns:1fr}.side{grid-template-columns:1fr 1fr}}@media(max-width:700px){.wrap{width:calc(100% - 18px)}.side{grid-template-columns:1fr}.canvasbox{min-height:420px}}
+
+.left-column{
+    display:grid;
+    gap:14px;
+    min-width:0;
+}
+
+.distance-card{
+    padding:20px 22px;
+    overflow:hidden;
+}
+
+.distance-head{
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-start;
+    gap:16px;
+    margin-bottom:12px;
+}
+
+.distance-title{
+    margin:0 0 6px;
+    font-size:21px;
+}
+
+.distance-description{
+    margin:0;
+    max-width:820px;
+    color:var(--muted);
+    font-size:14px;
+    line-height:1.55;
+}
+
+.dimension-badge{
+    flex:0 0 auto;
+    min-width:62px;
+    padding:9px 12px;
+    border:1px solid var(--line);
+    border-radius:12px;
+    background:#0c1527;
+    color:#ffd367;
+    text-align:center;
+    font-size:22px;
+    font-weight:850;
+}
+
+.formula-slider-row{
+    display:grid;
+    grid-template-columns:minmax(0,1fr) 52px;
+    gap:12px;
+    align-items:center;
+    margin:15px 0 13px;
+}
+
+.formula-slider-row input{
+    width:100%;
+    accent-color:var(--accent);
+}
+
+.formula-count{
+    padding:7px 0;
+    border:1px solid var(--line);
+    border-radius:10px;
+    background:#0c1527;
+    color:var(--text);
+    text-align:center;
+    font-size:18px;
+    font-weight:800;
+}
+
+.formula-box{
+    border:1px solid #334a75;
+    border-radius:15px;
+    background:linear-gradient(180deg,#0a1427,#091222);
+    padding:18px 16px;
+    overflow-x:auto;
+}
+
+.formula-main{
+    min-width:max-content;
+    color:#fff;
+    text-align:center;
+    font-family:"Cambria Math","Times New Roman",serif;
+    font-size:clamp(23px,2.25vw,35px);
+    line-height:1.35;
+    letter-spacing:.01em;
+}
+
+.formula-main .root{
+    display:inline-flex;
+    align-items:flex-start;
+}
+
+.formula-main .root-symbol{
+    font-size:1.32em;
+    line-height:.85;
+    margin-right:2px;
+}
+
+.formula-main .radicand{
+    border-top:2px solid currentColor;
+    padding:2px 4px 0 5px;
+}
+
+.formula-main .term-1{color:#ff7a7a}
+.formula-main .term-2{color:#7ebcff}
+.formula-main .term-3{color:#ffd35c}
+.formula-main .term-4{color:#74dfaa}
+.formula-main .operator{color:#dce7ff}
+
+.feature-pills{
+    display:flex;
+    flex-wrap:wrap;
+    gap:8px;
+    margin-top:13px;
+}
+
+.feature-pill{
+    padding:7px 10px;
+    border-radius:999px;
+    border:1px solid var(--line);
+    background:#0c1527;
+    color:var(--muted);
+    font-size:12px;
+    transition:.18s ease;
+}
+
+.feature-pill.active{
+    color:#fff;
+    border-color:#5574aa;
+    box-shadow:0 0 0 1px #5574aa33 inset;
+}
+
+.feature-pill:nth-child(1).active{background:#381c29}
+.feature-pill:nth-child(2).active{background:#142c49}
+.feature-pill:nth-child(3).active{background:#3a3013}
+.feature-pill:nth-child(4).active{background:#123426}
+
+.dimension-note{
+    margin:13px 0 0;
+    color:var(--muted);
+    font-size:13px;
+    line-height:1.55;
+}
+
+.dimension-note strong{
+    color:var(--text);
+}
+
+.project-note{
+    margin-top:10px;
+    padding:10px 12px;
+    border-left:3px solid var(--accent);
+    border-radius:0 9px 9px 0;
+    background:#0c172b;
+    color:#c9d6ee;
+    font-size:13px;
+    line-height:1.5;
+}
+
+@media(max-width:700px){
+    .distance-head{align-items:center}
+    .distance-card{padding:17px}
+    .formula-main{font-size:22px}
+}
+
+
+.pq-explanation{
+    display:grid;
+    grid-template-columns:1fr auto 1fr;
+    gap:12px;
+    align-items:center;
+    margin-top:14px;
+}
+
+.pq-item{
+    display:flex;
+    align-items:center;
+    gap:12px;
+    min-height:58px;
+    padding:12px 14px;
+    border:1px solid var(--line);
+    border-radius:13px;
+    background:#0c1527;
+    color:var(--muted);
+    font-size:13px;
+    line-height:1.45;
+}
+
+.pq-item strong{
+    display:grid;
+    place-items:center;
+    flex:0 0 38px;
+    width:38px;
+    height:38px;
+    border-radius:50%;
+    background:#16284a;
+    color:#fff;
+    font-family:"Cambria Math","Times New Roman",serif;
+    font-size:24px;
+}
+
+.pq-arrow{
+    color:var(--accent);
+    font-size:26px;
+    font-weight:800;
+}
+
+.pq-note{
+    margin:11px 0 0;
+    color:var(--muted);
+    font-size:13px;
+    line-height:1.55;
+}
+
+.pq-note strong{
+    color:var(--text);
+}
+
+@media(max-width:700px){
+    .pq-explanation{
+        grid-template-columns:1fr;
+    }
+
+    .pq-arrow{
+        text-align:center;
+        transform:rotate(90deg);
+    }
+}
+
+
+.euclidean-visual-note{
+    margin:11px 0 0;
+    color:var(--muted);
+    font-size:13px;
+    line-height:1.5;
+}
+.euclidean-visual-note strong{
+    color:var(--text);
+}
+
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>Interaktywna symulacja KNN — Iris</h1>
+<p class="lead">Przesuwaj <b>k</b>, zmieniaj cechy i klikaj na wykresie. Kolor tła pokazuje gatunek przewidywany przez KNN w danym miejscu, a linie wskazują wybranych sąsiadów.</p>
+<div class="grid">
+<div class="left-column">
+<section class="card plot"><div class="canvasbox"><canvas id="cv"></canvas><div class="tip">Kliknij na wykresie, aby dodać nowy kwiat</div></div></section>
+
+<section class="card distance-card" aria-labelledby="distanceTitle">
+    <div class="distance-head">
+        <div>
+            <h2 class="distance-title" id="distanceTitle">Jak KNN oblicza odległość?</h2>
+            <p class="distance-description">
+                Każdy irys opisujemy współrzędnymi. Przy czterech cechach jest on punktem
+                w <strong>przestrzeni czterowymiarowej</strong>, mimo że nie potrafimy jej
+                narysować na zwykłym wykresie.
+            </p>
+        </div>
+        <div class="dimension-badge" id="dimensionBadge">4D</div>
+    </div>
+
+    <label for="featureCount">Liczba cech pokazanych we wzorze</label>
+    <div class="formula-slider-row">
+        <input id="featureCount" type="range" min="1" max="4" step="1" value="4">
+        <div class="formula-count" id="featureCountValue">4</div>
+    </div>
+
+    <div class="formula-box">
+        <div class="formula-main" id="distanceFormula" aria-live="polite"></div>
+    </div>
+
+    <p class="euclidean-visual-note"><strong>Na wykresie 2D</strong> odległość euklidesowa jest pokazana jako <strong>prosty odcinek</strong> pomiędzy punktem testowym a sąsiadem.</p>
+
+    <div class="pq-explanation">
+        <div class="pq-item">
+            <strong>P</strong>
+            <span>nowy kwiat, którego gatunek chcemy rozpoznać</span>
+        </div>
+        <div class="pq-arrow">↔</div>
+        <div class="pq-item">
+            <strong>Q</strong>
+            <span>jeden znany kwiat ze zbioru uczącego</span>
+        </div>
+    </div>
+
+    <p class="pq-note">
+        Symbole <strong>p₁, p₂, p₃, p₄</strong> to kolejne cechy kwiatu P,
+        a <strong>q₁, q₂, q₃, q₄</strong> to odpowiadające im cechy kwiatu Q.
+        Algorytm porównuje cechy o tych samych numerach.
+    </p>
+
+    <div class="feature-pills" id="featurePills">
+        <span class="feature-pill active">p₁, q₁ — długość działki kielicha</span>
+        <span class="feature-pill active">p₂, q₂ — szerokość działki kielicha</span>
+        <span class="feature-pill active">p₃, q₃ — długość płatka</span>
+        <span class="feature-pill active">p₄, q₄ — szerokość płatka</span>
+    </div>
+
+    <p class="dimension-note" id="dimensionNote"></p>
+
+    
+</section>
+
+</div>
+<aside class="side">
+<section class="card panel">
+<h2>Ustawienia</h2>
+<label for="k">Liczba sąsiadów k</label><div class="slider"><input id="k" type="range" min="1" max="25" value="5"><div class="kval" id="kv">5</div></div>
+<label for="fx">Cecha na osi X</label><select id="fx"></select>
+<label for="fy">Cecha na osi Y</label><select id="fy"></select>
+<div class="checks">
+
+<label class="check"><input id="neighbors" type="checkbox" checked> Linie do sąsiadów</label>
+<label class="check"><input id="labels" type="checkbox"> Skróty gatunków</label>
+</div>
+<button id="reset">Usuń punkt testowy</button>
+<div class="legend"><div class="li"><span class="dot" style="background:#e45b5b"></span>Iris setosa</div><div class="li"><span class="dot" style="background:#278bc1"></span>Iris versicolor</div><div class="li"><span class="dot" style="background:#e8b719"></span>Iris virginica</div></div>
+</section>
+<section class="card panel"><h2>Wynik</h2><div class="result" id="pred">Kliknij na wykresie</div><div class="small" id="coords">Nie wybrano punktu.</div><div class="votes" id="votes"></div><div class="metric"><span>Skuteczność leave-one-out:</span><b id="acc">—</b></div></section>
+
+</aside>
+</div>
+</div>
+<script>
+const data=[{"sepal_length":5.1,"sepal_width":3.5,"petal_length":1.4,"petal_width":0.2,"species":"setosa"},{"sepal_length":4.9,"sepal_width":3.0,"petal_length":1.4,"petal_width":0.2,"species":"setosa"},{"sepal_length":4.7,"sepal_width":3.2,"petal_length":1.3,"petal_width":0.2,"species":"setosa"},{"sepal_length":4.6,"sepal_width":3.1,"petal_length":1.5,"petal_width":0.2,"species":"setosa"},{"sepal_length":5.0,"sepal_width":3.6,"petal_length":1.4,"petal_width":0.2,"species":"setosa"},{"sepal_length":5.4,"sepal_width":3.9,"petal_length":1.7,"petal_width":0.4,"species":"setosa"},{"sepal_length":4.6,"sepal_width":3.4,"petal_length":1.4,"petal_width":0.3,"species":"setosa"},{"sepal_length":5.0,"sepal_width":3.4,"petal_length":1.5,"petal_width":0.2,"species":"setosa"},{"sepal_length":4.4,"sepal_width":2.9,"petal_length":1.4,"petal_width":0.2,"species":"setosa"},{"sepal_length":4.9,"sepal_width":3.1,"petal_length":1.5,"petal_width":0.1,"species":"setosa"},{"sepal_length":5.4,"sepal_width":3.7,"petal_length":1.5,"petal_width":0.2,"species":"setosa"},{"sepal_length":4.8,"sepal_width":3.4,"petal_length":1.6,"petal_width":0.2,"species":"setosa"},{"sepal_length":4.8,"sepal_width":3.0,"petal_length":1.4,"petal_width":0.1,"species":"setosa"},{"sepal_length":4.3,"sepal_width":3.0,"petal_length":1.1,"petal_width":0.1,"species":"setosa"},{"sepal_length":5.8,"sepal_width":4.0,"petal_length":1.2,"petal_width":0.2,"species":"setosa"},{"sepal_length":5.7,"sepal_width":4.4,"petal_length":1.5,"petal_width":0.4,"species":"setosa"},{"sepal_length":5.4,"sepal_width":3.9,"petal_length":1.3,"petal_width":0.4,"species":"setosa"},{"sepal_length":5.1,"sepal_width":3.5,"petal_length":1.4,"petal_width":0.3,"species":"setosa"},{"sepal_length":5.7,"sepal_width":3.8,"petal_length":1.7,"petal_width":0.3,"species":"setosa"},{"sepal_length":5.1,"sepal_width":3.8,"petal_length":1.5,"petal_width":0.3,"species":"setosa"},{"sepal_length":5.4,"sepal_width":3.4,"petal_length":1.7,"petal_width":0.2,"species":"setosa"},{"sepal_length":5.1,"sepal_width":3.7,"petal_length":1.5,"petal_width":0.4,"species":"setosa"},{"sepal_length":4.6,"sepal_width":3.6,"petal_length":1.0,"petal_width":0.2,"species":"setosa"},{"sepal_length":5.1,"sepal_width":3.3,"petal_length":1.7,"petal_width":0.5,"species":"setosa"},{"sepal_length":4.8,"sepal_width":3.4,"petal_length":1.9,"petal_width":0.2,"species":"setosa"},{"sepal_length":5.0,"sepal_width":3.0,"petal_length":1.6,"petal_width":0.2,"species":"setosa"},{"sepal_length":5.0,"sepal_width":3.4,"petal_length":1.6,"petal_width":0.4,"species":"setosa"},{"sepal_length":5.2,"sepal_width":3.5,"petal_length":1.5,"petal_width":0.2,"species":"setosa"},{"sepal_length":5.2,"sepal_width":3.4,"petal_length":1.4,"petal_width":0.2,"species":"setosa"},{"sepal_length":4.7,"sepal_width":3.2,"petal_length":1.6,"petal_width":0.2,"species":"setosa"},{"sepal_length":4.8,"sepal_width":3.1,"petal_length":1.6,"petal_width":0.2,"species":"setosa"},{"sepal_length":5.4,"sepal_width":3.4,"petal_length":1.5,"petal_width":0.4,"species":"setosa"},{"sepal_length":5.2,"sepal_width":4.1,"petal_length":1.5,"petal_width":0.1,"species":"setosa"},{"sepal_length":5.5,"sepal_width":4.2,"petal_length":1.4,"petal_width":0.2,"species":"setosa"},{"sepal_length":4.9,"sepal_width":3.1,"petal_length":1.5,"petal_width":0.2,"species":"setosa"},{"sepal_length":5.0,"sepal_width":3.2,"petal_length":1.2,"petal_width":0.2,"species":"setosa"},{"sepal_length":5.5,"sepal_width":3.5,"petal_length":1.3,"petal_width":0.2,"species":"setosa"},{"sepal_length":4.9,"sepal_width":3.6,"petal_length":1.4,"petal_width":0.1,"species":"setosa"},{"sepal_length":4.4,"sepal_width":3.0,"petal_length":1.3,"petal_width":0.2,"species":"setosa"},{"sepal_length":5.1,"sepal_width":3.4,"petal_length":1.5,"petal_width":0.2,"species":"setosa"},{"sepal_length":5.0,"sepal_width":3.5,"petal_length":1.3,"petal_width":0.3,"species":"setosa"},{"sepal_length":4.5,"sepal_width":2.3,"petal_length":1.3,"petal_width":0.3,"species":"setosa"},{"sepal_length":4.4,"sepal_width":3.2,"petal_length":1.3,"petal_width":0.2,"species":"setosa"},{"sepal_length":5.0,"sepal_width":3.5,"petal_length":1.6,"petal_width":0.6,"species":"setosa"},{"sepal_length":5.1,"sepal_width":3.8,"petal_length":1.9,"petal_width":0.4,"species":"setosa"},{"sepal_length":4.8,"sepal_width":3.0,"petal_length":1.4,"petal_width":0.3,"species":"setosa"},{"sepal_length":5.1,"sepal_width":3.8,"petal_length":1.6,"petal_width":0.2,"species":"setosa"},{"sepal_length":4.6,"sepal_width":3.2,"petal_length":1.4,"petal_width":0.2,"species":"setosa"},{"sepal_length":5.3,"sepal_width":3.7,"petal_length":1.5,"petal_width":0.2,"species":"setosa"},{"sepal_length":5.0,"sepal_width":3.3,"petal_length":1.4,"petal_width":0.2,"species":"setosa"},{"sepal_length":7.0,"sepal_width":3.2,"petal_length":4.7,"petal_width":1.4,"species":"versicolor"},{"sepal_length":6.4,"sepal_width":3.2,"petal_length":4.5,"petal_width":1.5,"species":"versicolor"},{"sepal_length":6.9,"sepal_width":3.1,"petal_length":4.9,"petal_width":1.5,"species":"versicolor"},{"sepal_length":5.5,"sepal_width":2.3,"petal_length":4.0,"petal_width":1.3,"species":"versicolor"},{"sepal_length":6.5,"sepal_width":2.8,"petal_length":4.6,"petal_width":1.5,"species":"versicolor"},{"sepal_length":5.7,"sepal_width":2.8,"petal_length":4.5,"petal_width":1.3,"species":"versicolor"},{"sepal_length":6.3,"sepal_width":3.3,"petal_length":4.7,"petal_width":1.6,"species":"versicolor"},{"sepal_length":4.9,"sepal_width":2.4,"petal_length":3.3,"petal_width":1.0,"species":"versicolor"},{"sepal_length":6.6,"sepal_width":2.9,"petal_length":4.6,"petal_width":1.3,"species":"versicolor"},{"sepal_length":5.2,"sepal_width":2.7,"petal_length":3.9,"petal_width":1.4,"species":"versicolor"},{"sepal_length":5.0,"sepal_width":2.0,"petal_length":3.5,"petal_width":1.0,"species":"versicolor"},{"sepal_length":5.9,"sepal_width":3.0,"petal_length":4.2,"petal_width":1.5,"species":"versicolor"},{"sepal_length":6.0,"sepal_width":2.2,"petal_length":4.0,"petal_width":1.0,"species":"versicolor"},{"sepal_length":6.1,"sepal_width":2.9,"petal_length":4.7,"petal_width":1.4,"species":"versicolor"},{"sepal_length":5.6,"sepal_width":2.9,"petal_length":3.6,"petal_width":1.3,"species":"versicolor"},{"sepal_length":6.7,"sepal_width":3.1,"petal_length":4.4,"petal_width":1.4,"species":"versicolor"},{"sepal_length":5.6,"sepal_width":3.0,"petal_length":4.5,"petal_width":1.5,"species":"versicolor"},{"sepal_length":5.8,"sepal_width":2.7,"petal_length":4.1,"petal_width":1.0,"species":"versicolor"},{"sepal_length":6.2,"sepal_width":2.2,"petal_length":4.5,"petal_width":1.5,"species":"versicolor"},{"sepal_length":5.6,"sepal_width":2.5,"petal_length":3.9,"petal_width":1.1,"species":"versicolor"},{"sepal_length":5.9,"sepal_width":3.2,"petal_length":4.8,"petal_width":1.8,"species":"versicolor"},{"sepal_length":6.1,"sepal_width":2.8,"petal_length":4.0,"petal_width":1.3,"species":"versicolor"},{"sepal_length":6.3,"sepal_width":2.5,"petal_length":4.9,"petal_width":1.5,"species":"versicolor"},{"sepal_length":6.1,"sepal_width":2.8,"petal_length":4.7,"petal_width":1.2,"species":"versicolor"},{"sepal_length":6.4,"sepal_width":2.9,"petal_length":4.3,"petal_width":1.3,"species":"versicolor"},{"sepal_length":6.6,"sepal_width":3.0,"petal_length":4.4,"petal_width":1.4,"species":"versicolor"},{"sepal_length":6.8,"sepal_width":2.8,"petal_length":4.8,"petal_width":1.4,"species":"versicolor"},{"sepal_length":6.7,"sepal_width":3.0,"petal_length":5.0,"petal_width":1.7,"species":"versicolor"},{"sepal_length":6.0,"sepal_width":2.9,"petal_length":4.5,"petal_width":1.5,"species":"versicolor"},{"sepal_length":5.7,"sepal_width":2.6,"petal_length":3.5,"petal_width":1.0,"species":"versicolor"},{"sepal_length":5.5,"sepal_width":2.4,"petal_length":3.8,"petal_width":1.1,"species":"versicolor"},{"sepal_length":5.5,"sepal_width":2.4,"petal_length":3.7,"petal_width":1.0,"species":"versicolor"},{"sepal_length":5.8,"sepal_width":2.7,"petal_length":3.9,"petal_width":1.2,"species":"versicolor"},{"sepal_length":6.0,"sepal_width":2.7,"petal_length":5.1,"petal_width":1.6,"species":"versicolor"},{"sepal_length":5.4,"sepal_width":3.0,"petal_length":4.5,"petal_width":1.5,"species":"versicolor"},{"sepal_length":6.0,"sepal_width":3.4,"petal_length":4.5,"petal_width":1.6,"species":"versicolor"},{"sepal_length":6.7,"sepal_width":3.1,"petal_length":4.7,"petal_width":1.5,"species":"versicolor"},{"sepal_length":6.3,"sepal_width":2.3,"petal_length":4.4,"petal_width":1.3,"species":"versicolor"},{"sepal_length":5.6,"sepal_width":3.0,"petal_length":4.1,"petal_width":1.3,"species":"versicolor"},{"sepal_length":5.5,"sepal_width":2.5,"petal_length":4.0,"petal_width":1.3,"species":"versicolor"},{"sepal_length":5.5,"sepal_width":2.6,"petal_length":4.4,"petal_width":1.2,"species":"versicolor"},{"sepal_length":6.1,"sepal_width":3.0,"petal_length":4.6,"petal_width":1.4,"species":"versicolor"},{"sepal_length":5.8,"sepal_width":2.6,"petal_length":4.0,"petal_width":1.2,"species":"versicolor"},{"sepal_length":5.0,"sepal_width":2.3,"petal_length":3.3,"petal_width":1.0,"species":"versicolor"},{"sepal_length":5.6,"sepal_width":2.7,"petal_length":4.2,"petal_width":1.3,"species":"versicolor"},{"sepal_length":5.7,"sepal_width":3.0,"petal_length":4.2,"petal_width":1.2,"species":"versicolor"},{"sepal_length":5.7,"sepal_width":2.9,"petal_length":4.2,"petal_width":1.3,"species":"versicolor"},{"sepal_length":6.2,"sepal_width":2.9,"petal_length":4.3,"petal_width":1.3,"species":"versicolor"},{"sepal_length":5.1,"sepal_width":2.5,"petal_length":3.0,"petal_width":1.1,"species":"versicolor"},{"sepal_length":5.7,"sepal_width":2.8,"petal_length":4.1,"petal_width":1.3,"species":"versicolor"},{"sepal_length":6.3,"sepal_width":3.3,"petal_length":6.0,"petal_width":2.5,"species":"virginica"},{"sepal_length":5.8,"sepal_width":2.7,"petal_length":5.1,"petal_width":1.9,"species":"virginica"},{"sepal_length":7.1,"sepal_width":3.0,"petal_length":5.9,"petal_width":2.1,"species":"virginica"},{"sepal_length":6.3,"sepal_width":2.9,"petal_length":5.6,"petal_width":1.8,"species":"virginica"},{"sepal_length":6.5,"sepal_width":3.0,"petal_length":5.8,"petal_width":2.2,"species":"virginica"},{"sepal_length":7.6,"sepal_width":3.0,"petal_length":6.6,"petal_width":2.1,"species":"virginica"},{"sepal_length":4.9,"sepal_width":2.5,"petal_length":4.5,"petal_width":1.7,"species":"virginica"},{"sepal_length":7.3,"sepal_width":2.9,"petal_length":6.3,"petal_width":1.8,"species":"virginica"},{"sepal_length":6.7,"sepal_width":2.5,"petal_length":5.8,"petal_width":1.8,"species":"virginica"},{"sepal_length":7.2,"sepal_width":3.6,"petal_length":6.1,"petal_width":2.5,"species":"virginica"},{"sepal_length":6.5,"sepal_width":3.2,"petal_length":5.1,"petal_width":2.0,"species":"virginica"},{"sepal_length":6.4,"sepal_width":2.7,"petal_length":5.3,"petal_width":1.9,"species":"virginica"},{"sepal_length":6.8,"sepal_width":3.0,"petal_length":5.5,"petal_width":2.1,"species":"virginica"},{"sepal_length":5.7,"sepal_width":2.5,"petal_length":5.0,"petal_width":2.0,"species":"virginica"},{"sepal_length":5.8,"sepal_width":2.8,"petal_length":5.1,"petal_width":2.4,"species":"virginica"},{"sepal_length":6.4,"sepal_width":3.2,"petal_length":5.3,"petal_width":2.3,"species":"virginica"},{"sepal_length":6.5,"sepal_width":3.0,"petal_length":5.5,"petal_width":1.8,"species":"virginica"},{"sepal_length":7.7,"sepal_width":3.8,"petal_length":6.7,"petal_width":2.2,"species":"virginica"},{"sepal_length":7.7,"sepal_width":2.6,"petal_length":6.9,"petal_width":2.3,"species":"virginica"},{"sepal_length":6.0,"sepal_width":2.2,"petal_length":5.0,"petal_width":1.5,"species":"virginica"},{"sepal_length":6.9,"sepal_width":3.2,"petal_length":5.7,"petal_width":2.3,"species":"virginica"},{"sepal_length":5.6,"sepal_width":2.8,"petal_length":4.9,"petal_width":2.0,"species":"virginica"},{"sepal_length":7.7,"sepal_width":2.8,"petal_length":6.7,"petal_width":2.0,"species":"virginica"},{"sepal_length":6.3,"sepal_width":2.7,"petal_length":4.9,"petal_width":1.8,"species":"virginica"},{"sepal_length":6.7,"sepal_width":3.3,"petal_length":5.7,"petal_width":2.1,"species":"virginica"},{"sepal_length":7.2,"sepal_width":3.2,"petal_length":6.0,"petal_width":1.8,"species":"virginica"},{"sepal_length":6.2,"sepal_width":2.8,"petal_length":4.8,"petal_width":1.8,"species":"virginica"},{"sepal_length":6.1,"sepal_width":3.0,"petal_length":4.9,"petal_width":1.8,"species":"virginica"},{"sepal_length":6.4,"sepal_width":2.8,"petal_length":5.6,"petal_width":2.1,"species":"virginica"},{"sepal_length":7.2,"sepal_width":3.0,"petal_length":5.8,"petal_width":1.6,"species":"virginica"},{"sepal_length":7.4,"sepal_width":2.8,"petal_length":6.1,"petal_width":1.9,"species":"virginica"},{"sepal_length":7.9,"sepal_width":3.8,"petal_length":6.4,"petal_width":2.0,"species":"virginica"},{"sepal_length":6.4,"sepal_width":2.8,"petal_length":5.6,"petal_width":2.2,"species":"virginica"},{"sepal_length":6.3,"sepal_width":2.8,"petal_length":5.1,"petal_width":1.5,"species":"virginica"},{"sepal_length":6.1,"sepal_width":2.6,"petal_length":5.6,"petal_width":1.4,"species":"virginica"},{"sepal_length":7.7,"sepal_width":3.0,"petal_length":6.1,"petal_width":2.3,"species":"virginica"},{"sepal_length":6.3,"sepal_width":3.4,"petal_length":5.6,"petal_width":2.4,"species":"virginica"},{"sepal_length":6.4,"sepal_width":3.1,"petal_length":5.5,"petal_width":1.8,"species":"virginica"},{"sepal_length":6.0,"sepal_width":3.0,"petal_length":4.8,"petal_width":1.8,"species":"virginica"},{"sepal_length":6.9,"sepal_width":3.1,"petal_length":5.4,"petal_width":2.1,"species":"virginica"},{"sepal_length":6.7,"sepal_width":3.1,"petal_length":5.6,"petal_width":2.4,"species":"virginica"},{"sepal_length":6.9,"sepal_width":3.1,"petal_length":5.1,"petal_width":2.3,"species":"virginica"},{"sepal_length":5.8,"sepal_width":2.7,"petal_length":5.1,"petal_width":1.9,"species":"virginica"},{"sepal_length":6.8,"sepal_width":3.2,"petal_length":5.9,"petal_width":2.3,"species":"virginica"},{"sepal_length":6.7,"sepal_width":3.3,"petal_length":5.7,"petal_width":2.5,"species":"virginica"},{"sepal_length":6.7,"sepal_width":3.0,"petal_length":5.2,"petal_width":2.3,"species":"virginica"},{"sepal_length":6.3,"sepal_width":2.5,"petal_length":5.0,"petal_width":1.9,"species":"virginica"},{"sepal_length":6.5,"sepal_width":3.0,"petal_length":5.2,"petal_width":2.0,"species":"virginica"},{"sepal_length":6.2,"sepal_width":3.4,"petal_length":5.4,"petal_width":2.3,"species":"virginica"},{"sepal_length":5.9,"sepal_width":3.0,"petal_length":5.1,"petal_width":1.8,"species":"virginica"}];
+const names={sepal_length:"Długość działki kielicha [cm]",sepal_width:"Szerokość działki kielicha [cm]",petal_length:"Długość płatka [cm]",petal_width:"Szerokość płatka [cm]"};
+const colors={setosa:"#e45b5b",versicolor:"#278bc1",virginica:"#e8b719"};
+const soft={setosa:"rgba(228,91,91,.24)",versicolor:"rgba(39,139,193,.24)",virginica:"rgba(232,183,25,.24)"};
+const short={setosa:"S",versicolor:"Ve",virginica:"Vi"};
+const cv=document.querySelector("#cv"),ctx=cv.getContext("2d"),kEl=document.querySelector("#k"),kv=document.querySelector("#kv"),fx=document.querySelector("#fx"),fy=document.querySelector("#fy"),neighbors=document.querySelector("#neighbors"),labels=document.querySelector("#labels"),pred=document.querySelector("#pred"),coords=document.querySelector("#coords"),votesBox=document.querySelector("#votes"),acc=document.querySelector("#acc");
+Object.entries(names).forEach(([v,t])=>{fx.add(new Option(t,v));fy.add(new Option(t,v))});fx.value="petal_length";fy.value="petal_width";let chosen=null;
+function geom(){const r=cv.getBoundingClientRect(),m={l:76,r:24,t:26,b:66};return{w:r.width,h:r.height,l:m.l,t:m.t,pw:r.width-m.l-m.r,ph:r.height-m.t-m.b}}
+function bounds(){const xs=data.map(d=>d[fx.value]),ys=data.map(d=>d[fy.value]);let xmin=Math.min(...xs),xmax=Math.max(...xs),ymin=Math.min(...ys),ymax=Math.max(...ys),xp=(xmax-xmin)*.1,yp=(ymax-ymin)*.1;return{xmin:xmin-xp,xmax:xmax+xp,ymin:ymin-yp,ymax:ymax+yp}}
+function d2p(x,y,b,g){return[g.l+(x-b.xmin)/(b.xmax-b.xmin)*g.pw,g.t+g.ph-(y-b.ymin)/(b.ymax-b.ymin)*g.ph]}
+function p2d(x,y,b,g){return[b.xmin+(x-g.l)/g.pw*(b.xmax-b.xmin),b.ymin+(g.t+g.ph-y)/g.ph*(b.ymax-b.ymin)]}
+function euclideanDistance(pointA,pointB){
+    const dx=pointA[fx.value]-pointB[fx.value];
+    const dy=pointA[fy.value]-pointB[fy.value];
+
+    return Math.sqrt(dx*dx+dy*dy);
+}
+
+function classify(p,k,skip=-1){
+    const ds=[];
+
+    for(let i=0;i<data.length;i++){
+        if(i===skip)continue;
+
+        ds.push({
+            dist:euclideanDistance(p,data[i]),
+            sp:data[i].species,
+            item:data[i]
+        });
+    }
+
+    ds.sort((a,b)=>a.dist-b.dist);
+
+    const ns=ds.slice(0,k);
+    const v={setosa:0,versicolor:0,virginica:0};
+    const sum={setosa:0,versicolor:0,virginica:0};
+
+    ns.forEach(n=>{
+        v[n.sp]++;
+        sum[n.sp]+=n.dist;
+    });
+
+    const order=Object.keys(v).sort(
+        (a,b)=>v[b]-v[a]||sum[a]-sum[b]
+    );
+
+    return{sp:order[0],votes:v,ns};
+}
+function grid(g,b){ctx.fillStyle="#f7f9fd";ctx.fillRect(0,0,g.w,g.h);ctx.strokeStyle="#d9e1ed";ctx.lineWidth=1;ctx.fillStyle="#55627a";ctx.font="12px system-ui";for(let i=0;i<=6;i++){const x=g.l+i/6*g.pw,y=g.t+i/6*g.ph;ctx.beginPath();ctx.moveTo(x,g.t);ctx.lineTo(x,g.t+g.ph);ctx.stroke();ctx.beginPath();ctx.moveTo(g.l,y);ctx.lineTo(g.l+g.pw,y);ctx.stroke();ctx.textAlign="center";ctx.textBaseline="top";ctx.fillText((b.xmin+i/6*(b.xmax-b.xmin)).toFixed(1),x,g.t+g.ph+9);ctx.textAlign="right";ctx.textBaseline="middle";ctx.fillText((b.ymax-i/6*(b.ymax-b.ymin)).toFixed(1),g.l-10,y)}ctx.strokeStyle="#6c7890";ctx.lineWidth=1.5;ctx.strokeRect(g.l,g.t,g.pw,g.ph);ctx.fillStyle="#24324b";ctx.font="600 14px system-ui";ctx.textAlign="center";ctx.textBaseline="bottom";ctx.fillText(names[fx.value],g.l+g.pw/2,g.h-10);ctx.save();ctx.translate(18,g.t+g.ph/2);ctx.rotate(-Math.PI/2);ctx.textAlign="center";ctx.textBaseline="top";ctx.fillText(names[fy.value],0,0);ctx.restore()}
+function drawPoints(g,b){data.forEach(d=>{const [x,y]=d2p(d[fx.value],d[fy.value],b,g);ctx.beginPath();ctx.arc(x,y,5.1,0,Math.PI*2);ctx.fillStyle=colors[d.species];ctx.fill();ctx.lineWidth=1.1;ctx.strokeStyle="#16213ccc";ctx.stroke();if(labels.checked){ctx.fillStyle="#1b2942";ctx.font="700 9px system-ui";ctx.textAlign="left";ctx.fillText(short[d.species],x+6,y-4)}})}
+function panel(r,p,k){pred.textContent="Przewidywany gatunek: "+r.sp;pred.style.color=colors[r.sp];coords.textContent=`${names[fx.value]}: ${p[fx.value].toFixed(2)} | ${names[fy.value]}: ${p[fy.value].toFixed(2)}`;votesBox.innerHTML="";Object.keys(colors).forEach(sp=>{const row=document.createElement("div");row.className="vrow";row.innerHTML=`<span>${sp}</span><div class="bar"><div class="fill" style="width:${r.votes[sp]/k*100}%;background:${colors[sp]}"></div></div><b>${r.votes[sp]}</b>`;votesBox.append(row)})}
+function drawChosen(g,b,k){
+    if(!chosen)return;
+
+    const r=classify(chosen,k);
+    const [x,y]=d2p(chosen[fx.value],chosen[fy.value],b,g);
+
+    if(neighbors.checked){
+        const groupedNeighbors=new Map();
+
+        r.ns.forEach(n=>{
+            const key=
+                n.item[fx.value].toFixed(8)+"|"+
+                n.item[fy.value].toFixed(8)+"|"+
+                n.sp;
+
+            if(!groupedNeighbors.has(key)){
+                groupedNeighbors.set(key,{
+                    neighbor:n,
+                    count:0
+                });
+            }
+
+            groupedNeighbors.get(key).count++;
+        });
+
+        groupedNeighbors.forEach(group=>{
+            const n=group.neighbor;
+            const [nx,ny]=d2p(
+                n.item[fx.value],
+                n.item[fy.value],
+                b,
+                g
+            );
+
+            // Odległość euklidesowa jest najkrótszym, prostym odcinkiem
+            // łączącym punkt testowy z jego sąsiadem.
+            ctx.beginPath();
+            ctx.moveTo(x,y);
+            ctx.lineTo(nx,ny);
+            ctx.strokeStyle=colors[n.sp];
+            ctx.globalAlpha=.72;
+            ctx.lineWidth=1.8;
+            ctx.stroke();
+
+            // Obramowanie punktu wybranego jako sąsiad.
+            ctx.beginPath();
+            ctx.arc(nx,ny,7.4,0,Math.PI*2);
+            ctx.strokeStyle=colors[n.sp];
+            ctx.globalAlpha=.98;
+            ctx.lineWidth=2;
+            ctx.stroke();
+
+            // Gdy kilka irysów ma te same współrzędne,
+            // pokazujemy liczbę nakładających się sąsiadów.
+            if(group.count>1){
+                const badgeX=nx+10;
+                const badgeY=ny-10;
+                const text="×"+group.count;
+
+                ctx.font="700 11px system-ui";
+                const textWidth=ctx.measureText(text).width;
+
+                ctx.fillStyle="#10192b";
+                ctx.globalAlpha=.92;
+                ctx.beginPath();
+                ctx.roundRect(
+                    badgeX-4,
+                    badgeY-11,
+                    textWidth+8,
+                    17,
+                    6
+                );
+                ctx.fill();
+
+                ctx.fillStyle="#ffffff";
+                ctx.globalAlpha=1;
+                ctx.textAlign="left";
+                ctx.textBaseline="middle";
+                ctx.fillText(text,badgeX,badgeY-2);
+            }
+        });
+
+        ctx.globalAlpha=1;
+    }
+
+    // Punkt testowy
+    ctx.beginPath();
+    ctx.arc(x,y,11,0,Math.PI*2);
+    ctx.fillStyle="#fff";
+    ctx.fill();
+    ctx.lineWidth=4;
+    ctx.strokeStyle=colors[r.sp];
+    ctx.stroke();
+
+    ctx.beginPath();
+    ctx.moveTo(x-6,y);
+    ctx.lineTo(x+6,y);
+    ctx.moveTo(x,y-6);
+    ctx.lineTo(x,y+6);
+    ctx.strokeStyle="#111b30";
+    ctx.lineWidth=2;
+    ctx.stroke();
+
+    panel(r,chosen,k);
+}
+function accuracy(k){let ok=0;data.forEach((d,i)=>{if(classify(d,k,i).sp===d.species)ok++});return ok/data.length}
+function draw(){const g=geom(),b=bounds(),k=+kEl.value;ctx.clearRect(0,0,g.w,g.h);grid(g,b);drawPoints(g,b);drawChosen(g,b,k);acc.textContent=(accuracy(k)*100).toFixed(1)+"%"}
+function resize(){const r=cv.getBoundingClientRect(),q=devicePixelRatio||1;cv.width=Math.round(r.width*q);cv.height=Math.round(r.height*q);ctx.setTransform(q,0,0,q,0,0);draw()}
+cv.addEventListener("click",e=>{const r=cv.getBoundingClientRect(),g=geom(),x=e.clientX-r.left,y=e.clientY-r.top;if(x<g.l||x>g.l+g.pw||y<g.t||y>g.t+g.ph)return;const [dx,dy]=p2d(x,y,bounds(),g);chosen={[fx.value]:dx,[fy.value]:dy};draw()});
+kEl.addEventListener("input",()=>{kv.textContent=kEl.value;draw()});[neighbors,labels].forEach(e=>e.addEventListener("change",draw));
+function featureChange(changed){if(fx.value===fy.value){const fs=Object.keys(names),i=fs.indexOf(changed==="x"?fy.value:fx.value),rep=fs[(i+1)%fs.length];if(changed==="x")fy.value=rep;else fx.value=rep}chosen=null;pred.textContent="Kliknij na wykresie";pred.style.color="";coords.textContent="Nie wybrano punktu.";votesBox.innerHTML="";draw()}
+fx.addEventListener("change",()=>featureChange("x"));fy.addEventListener("change",()=>featureChange("y"));document.querySelector("#reset").addEventListener("click",()=>{chosen=null;pred.textContent="Kliknij na wykresie";pred.style.color="";coords.textContent="Nie wybrano punktu.";votesBox.innerHTML="";draw()});window.addEventListener("resize",resize);resize();
+
+const featureCountSlider = document.querySelector("#featureCount");
+const featureCountValue = document.querySelector("#featureCountValue");
+const dimensionBadge = document.querySelector("#dimensionBadge");
+const distanceFormula = document.querySelector("#distanceFormula");
+const dimensionNote = document.querySelector("#dimensionNote");
+const featurePills = [...document.querySelectorAll("#featurePills .feature-pill")];
+
+const distanceTerms = [
+    '<span class="term-1">(p₁ − q₁)²</span>',
+    '<span class="term-2">(p₂ − q₂)²</span>',
+    '<span class="term-3">(p₃ − q₃)²</span>',
+    '<span class="term-4">(p₄ − q₄)²</span>'
+];
+
+function updateDistanceFormula(){
+    const featureCount = Number(featureCountSlider.value);
+    const visibleTerms = distanceTerms
+        .slice(0, featureCount)
+        .join('<span class="operator"> + </span>');
+
+    distanceFormula.innerHTML =
+        '<span>d(P,Q) = </span>' +
+        '<span class="root">' +
+            '<span class="root-symbol">√</span>' +
+            '<span class="radicand">' + visibleTerms + '</span>' +
+        '</span>';
+
+    featureCountValue.textContent = featureCount;
+    dimensionBadge.textContent = featureCount + "D";
+
+    featurePills.forEach((pill, index) => {
+        pill.classList.toggle("active", index < featureCount);
+    });
+
+    const dimensionNames = {
+        1: "jednowymiarowej",
+        2: "dwuwymiarowej",
+        3: "trójwymiarowej",
+        4: "czterowymiarowej"
+    };
+
+    const coordinateText = featureCount === 1
+        ? "jedną współrzędną"
+        : featureCount + " współrzędne";
+
+    const featurePhrase = featureCount === 1
+        ? "1 cesze"
+        : featureCount + " cechach";
+
+    dimensionNote.innerHTML =
+        'Przy <strong>' + featurePhrase +
+        '</strong> każdy kwiat ma ' + coordinateText +
+        ' i znajduje się w przestrzeni <strong>' +
+        dimensionNames[featureCount] + '</strong>. ' +
+        'Odległość otrzymujemy przez obliczenie różnic między odpowiadającymi sobie cechami, ' +
+        'podniesienie ich do kwadratu, zsumowanie i wyciągnięcie pierwiastka.';
+}
+
+featureCountSlider.addEventListener("input", updateDistanceFormula);
+updateDistanceFormula();
+
+</script>
+</body></html>
