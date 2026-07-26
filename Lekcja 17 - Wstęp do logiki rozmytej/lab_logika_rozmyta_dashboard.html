@@ -1,0 +1,282 @@
+<!doctype html>
+<html lang="pl">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Laboratorium logiki rozmytej — dashboard</title>
+<style>
+:root{
+  --bg:#f2f5fb;--paper:#fff;--ink:#172033;--muted:#5f6d82;--line:#dbe3f0;
+  --orange:#ff7a00;--orange2:#ffb35c;--pink:#ef476f;--green:#06a77d;
+  --blue:#4b82f0;--purple:#8f63ff;--shadow:0 14px 42px rgba(23,32,51,.11);
+}
+*{box-sizing:border-box}
+html,body{width:100%;height:100%;margin:0;overflow:hidden}
+body{
+  font-family:Inter,Segoe UI,Arial,sans-serif;
+  background:linear-gradient(180deg,#eef3fb,#f8fafc);
+  color:var(--ink);
+}
+body:before,body:after{content:"";position:fixed;width:310px;height:310px;border-radius:50%;z-index:-1;opacity:.11}
+body:before{background:var(--orange);left:-120px;top:-110px}
+body:after{background:var(--purple);right:-130px;bottom:-120px}
+
+.app{
+  width:100vw;height:100dvh;padding:12px;
+  display:grid;grid-template-rows:auto minmax(0,1fr);gap:10px;
+}
+.topbar{
+  position:relative;background:rgba(255,255,255,.97);border:1px solid var(--line);
+  border-radius:20px;box-shadow:var(--shadow);padding:13px 20px 12px 22px;
+  display:flex;align-items:center;justify-content:space-between;gap:20px;overflow:hidden;
+}
+.topbar:before{content:"";position:absolute;left:0;top:0;bottom:0;width:7px;background:linear-gradient(180deg,var(--orange),var(--orange2))}
+.titleGroup{display:flex;align-items:baseline;gap:16px;min-width:0}
+.titleGroup h1{margin:0;font-size:clamp(24px,2.25vw,38px);letter-spacing:-.045em;white-space:nowrap}
+.titleGroup p{margin:0;color:var(--muted);font-size:clamp(13px,1vw,17px);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.liveBadge{display:flex;align-items:center;gap:8px;padding:8px 12px;border-radius:999px;background:#fff5e9;border:1px solid #ffd5a8;color:#8a4700;font-size:13px;font-weight:900;white-space:nowrap}
+.liveDot{width:9px;height:9px;border-radius:50%;background:var(--orange);box-shadow:0 0 0 5px rgba(255,122,0,.12)}
+
+.dashboard{min-height:0;display:grid;grid-template-columns:330px minmax(0,1fr);gap:10px}
+.panel,.card{background:rgba(255,255,255,.97);border:1px solid var(--line);border-radius:20px;box-shadow:var(--shadow)}
+.panel{min-height:0;padding:15px;display:flex;flex-direction:column;overflow:hidden}
+.panelTitle{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+.panelTitle h2{font-size:21px;margin:0;letter-spacing:-.025em}
+.panelTitle span{font-size:12px;color:var(--muted);font-weight:800}
+.controlBlock{padding:10px 11px;border:1px solid var(--line);border-radius:15px;background:#fbfcff;margin-bottom:8px}
+.controlHead{display:flex;justify-content:space-between;align-items:center;margin-bottom:5px}
+.controlHead label{font-size:15px;font-weight:900}
+.controlValue{font-size:20px;font-weight:950;color:var(--orange)}
+input[type=range]{width:100%;accent-color:var(--orange);height:20px}
+.presets{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:9px}
+.preset{border:1px solid var(--line);background:#f4f7fc;color:var(--ink);border-radius:12px;padding:8px 7px;font-size:12px;font-weight:850;cursor:pointer}
+.preset:hover{background:#fff4e8;border-color:#ffc988}
+.sectionLabel{font-size:12px;font-weight:950;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin:3px 1px 6px}
+.membershipGrid{display:grid;grid-template-columns:1fr 1fr;gap:5px;margin-bottom:8px}
+.muItem{display:flex;align-items:center;justify-content:space-between;gap:8px;border:1px solid var(--line);border-radius:11px;padding:6px 8px;background:#fbfcff;font-size:12px}
+.muItem b{font-size:14px}.muDot{width:8px;height:8px;border-radius:50%;flex:0 0 auto;margin-right:5px}.muName{display:flex;align-items:center;min-width:0}
+.ruleTable{width:100%;border-collapse:separate;border-spacing:0;font-size:11px;overflow:hidden;border:1px solid var(--line);border-radius:12px}
+.ruleTable th,.ruleTable td{padding:6px 5px;border-bottom:1px solid var(--line);text-align:left;vertical-align:middle}
+.ruleTable th{background:#f4f7fc;font-size:10px;text-transform:uppercase;letter-spacing:.04em;color:var(--muted)}
+.ruleTable tr:last-child td{border-bottom:0}.ruleTable td:last-child{text-align:right;font-size:14px;font-weight:950;color:var(--orange)}
+.panelHint{margin-top:auto;padding:8px 10px;border-left:4px solid var(--orange);border-radius:0 10px 10px 0;background:#fff7ef;font-size:11px;line-height:1.25;color:#39445a}
+
+.visualArea{min-height:0;display:grid;grid-template-rows:minmax(0,.43fr) minmax(0,.57fr);gap:10px}
+.chartsRow{min-height:0;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.chartCard{min-height:0;padding:10px 10px 8px;display:grid;grid-template-rows:auto minmax(0,1fr) auto;overflow:hidden}
+.chartCard h3,.aggCard h3{font-size:16px;margin:0 0 4px;letter-spacing:-.02em}
+.svgWrap{min-height:0;background:#fff;border:1px solid var(--line);border-radius:14px;padding:2px;overflow:hidden}
+.svgWrap svg{display:block;width:100%;height:100%;min-height:0}
+.legend{display:flex;flex-wrap:wrap;gap:5px;margin-top:5px;min-height:18px}
+.legend span{display:inline-flex;align-items:center;gap:5px;font-size:10px;font-weight:800;color:#455169}
+.legend i{width:8px;height:8px;border-radius:50%}
+
+.bottomRow{min-height:0;display:grid;grid-template-columns:minmax(0,1.72fr) minmax(285px,.68fr);gap:10px}
+.aggCard{min-height:0;padding:10px;display:grid;grid-template-rows:auto auto minmax(0,1fr);overflow:hidden}
+.aggHead{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.aggSub{font-size:11px;color:var(--muted);white-space:nowrap}
+.activationChips{display:flex;gap:6px;flex-wrap:wrap;margin:4px 0 6px}
+.activationChips span{font-size:10px;font-weight:900;border:1px solid var(--line);border-radius:999px;padding:4px 7px;background:#f6f8fd}
+.decisionCard{min-height:0;padding:13px;display:flex;flex-direction:column;overflow:hidden;background:linear-gradient(180deg,#fff,#fff9f2)}
+.decisionLabel{font-size:12px;text-transform:uppercase;letter-spacing:.08em;font-weight:950;color:var(--muted)}
+.scoreLine{display:flex;align-items:flex-end;gap:5px;margin:4px 0 3px}
+.score{font-size:clamp(46px,5vw,78px);line-height:.9;font-weight:1000;letter-spacing:-.07em;color:var(--orange)}
+.scoreMax{font-size:19px;color:var(--muted);font-weight:900;margin-bottom:5px}
+.gauge{height:15px;border-radius:999px;border:1px solid #d8e0ec;background:linear-gradient(90deg,#e7edf6 0 50%,#ffd8a9 50% 100%);position:relative;margin:8px 0 4px}
+.gaugeMarker{position:absolute;top:50%;width:19px;height:19px;border-radius:50%;background:var(--orange);border:3px solid #fff;box-shadow:0 2px 8px rgba(0,0,0,.22);transform:translate(-50%,-50%);left:0}
+.gaugeLabels{display:flex;justify-content:space-between;font-size:9px;font-weight:850;color:var(--muted)}
+.decisionText{font-size:18px;font-weight:950;line-height:1.14;margin:11px 0 6px}
+.explanation{font-size:12px;line-height:1.35;color:#3e4a61;margin:0 0 9px}
+.formula{font-family:Consolas,Monaco,monospace;background:#f5f7fb;border:1px solid var(--line);border-radius:12px;padding:8px 9px;font-size:11px;text-align:center}
+.outputBars{margin-top:auto;display:grid;gap:5px}
+.outputRow{display:grid;grid-template-columns:93px 1fr 39px;gap:6px;align-items:center;font-size:10px;font-weight:850}
+.miniBar{height:8px;border-radius:999px;background:#e9eef6;overflow:hidden}.miniBar span{display:block;height:100%;width:0;border-radius:inherit}
+
+@media(max-width:1250px){
+  html,body{overflow:auto;height:auto}.app{height:auto;min-height:100vh}.dashboard{grid-template-columns:1fr}.panel{overflow:visible}.visualArea{grid-template-rows:auto auto}.chartsRow{grid-template-columns:1fr 1fr}.bottomRow{grid-template-columns:1fr}.chartCard{min-height:310px}.aggCard{min-height:430px}.decisionCard{min-height:320px}.titleGroup p{display:none}
+}
+@media(max-width:760px){.chartsRow{grid-template-columns:1fr}.titleGroup h1{white-space:normal}.liveBadge{display:none}}
+</style>
+</head>
+<body>
+<div class="app">
+  <header class="topbar">
+    <div class="titleGroup">
+      <h1>Laboratorium logiki rozmytej</h1>
+      <p>Zmieniaj HP i odległość — cały proces aktualizuje się na żywo.</p>
+    </div>
+    <div class="liveBadge"><span class="liveDot"></span>dashboard interaktywny</div>
+  </header>
+
+  <main class="dashboard">
+    <aside class="panel">
+      <div class="panelTitle"><h2>Panel sterowania</h2><span>dane wejściowe</span></div>
+
+      <div class="controlBlock">
+        <div class="controlHead"><label for="hp">Życie gracza</label><div class="controlValue"><span id="hpVal">35</span> HP</div></div>
+        <input id="hp" type="range" min="0" max="100" step="1" value="35">
+      </div>
+      <div class="controlBlock">
+        <div class="controlHead"><label for="dist">Odległość</label><div class="controlValue"><span id="distVal">12</span> bloków</div></div>
+        <input id="dist" type="range" min="0" max="50" step="1" value="12">
+      </div>
+
+      <div class="presets">
+        <button class="preset" onclick="preset(35,12)">Przykład bazowy</button>
+        <button class="preset" onclick="preset(15,8)">Słaby + blisko</button>
+        <button class="preset" onclick="preset(80,8)">Silny + blisko</button>
+        <button class="preset" onclick="preset(45,40)">Średnio + daleko</button>
+      </div>
+
+      <div class="sectionLabel">Przynależności wejściowe</div>
+      <div class="membershipGrid">
+        <div class="muItem"><span class="muName"><i class="muDot" style="background:var(--pink)"></i>HP niskie</span><b id="muLow">0</b></div>
+        <div class="muItem"><span class="muName"><i class="muDot" style="background:var(--orange)"></i>HP średnie</span><b id="muMid">0</b></div>
+        <div class="muItem"><span class="muName"><i class="muDot" style="background:var(--green)"></i>HP wysokie</span><b id="muHigh">0</b></div>
+        <div class="muItem"><span class="muName"><i class="muDot" style="background:var(--blue)"></i>Blisko</span><b id="muClose">0</b></div>
+        <div class="muItem"><span class="muName"><i class="muDot" style="background:var(--purple)"></i>Daleko</span><b id="muFar">0</b></div>
+      </div>
+
+      <div class="sectionLabel">Aktywacja reguł</div>
+      <table class="ruleTable">
+        <thead><tr><th>Reguła</th><th>Wynik</th><th>μ</th></tr></thead>
+        <tbody id="ruleBody"></tbody>
+      </table>
+      <div class="panelHint">Wartości reguł mówią, jak mocno każda reguła pasuje do aktualnej sytuacji. Nie są jeszcze siłą ataku.</div>
+    </aside>
+
+    <section class="visualArea">
+      <div class="chartsRow">
+        <article class="card chartCard">
+          <h3>Życie gracza</h3>
+          <div class="svgWrap"><svg id="hpChart"></svg></div>
+          <div class="legend"><span><i style="background:var(--pink)"></i>niskie</span><span><i style="background:var(--orange)"></i>średnie</span><span><i style="background:var(--green)"></i>wysokie</span></div>
+        </article>
+        <article class="card chartCard">
+          <h3>Odległość</h3>
+          <div class="svgWrap"><svg id="distChart"></svg></div>
+          <div class="legend"><span><i style="background:var(--blue)"></i>blisko</span><span><i style="background:var(--purple)"></i>daleko</span></div>
+        </article>
+        <article class="card chartCard">
+          <h3>Zbiory poziomu ataku</h3>
+          <div class="svgWrap"><svg id="attackBaseChart"></svg></div>
+          <div class="legend"><span><i style="background:var(--blue)"></i>brak</span><span><i style="background:var(--orange)"></i>ostrożny</span><span><i style="background:var(--pink)"></i>zdecydowany</span></div>
+        </article>
+      </div>
+
+      <div class="bottomRow">
+        <article class="card aggCard">
+          <div class="aggHead"><h3>Agregacja i centroid</h3><div class="aggSub">przycinanie → maksimum → środek ciężkości</div></div>
+          <div class="activationChips">
+            <span>brak: <b id="noneAct">0</b></span>
+            <span>ostrożny: <b id="cautAct">0</b></span>
+            <span>zdecydowany: <b id="strongAct">0</b></span>
+          </div>
+          <div class="svgWrap"><svg id="aggChart"></svg></div>
+        </article>
+
+        <aside class="card decisionCard">
+          <div class="decisionLabel">Końcowa decyzja</div>
+          <div class="scoreLine"><div class="score" id="centroidText">74</div><div class="scoreMax">/100</div></div>
+          <div class="gauge"><div class="gaugeMarker" id="gaugeMarker"></div></div>
+          <div class="gaugeLabels"><span>brak ataku</span><span>ostrożny</span><span>pełny atak</span></div>
+          <div class="decisionText" id="decisionText">Dość mocny atak.</div>
+          <p class="explanation" id="explainCentroid">Centroid pokazuje, gdzie znajduje się środek ciężkości całego połączonego wyniku.</p>
+          <div class="formula">centroid ≈ Σ(x · μ(x)) / Σ μ(x)</div>
+          <div class="outputBars">
+            <div class="outputRow"><span>brak ataku</span><div class="miniBar"><span id="barNone" style="background:var(--blue)"></span></div><b id="barNoneVal">0</b></div>
+            <div class="outputRow"><span>ostrożny</span><div class="miniBar"><span id="barCaut" style="background:var(--orange)"></span></div><b id="barCautVal">0</b></div>
+            <div class="outputRow"><span>zdecydowany</span><div class="miniBar"><span id="barStrong" style="background:var(--pink)"></span></div><b id="barStrongVal">0</b></div>
+          </div>
+        </aside>
+      </div>
+    </section>
+  </main>
+</div>
+
+<script>
+function fmt(v,d=2){return(+v).toFixed(d).replace(/\.00$/,'').replace(/(\.[1-9])0$/,'$1')}
+function trimf(x,a,b,c){x=+x;if(a===b){if(x<=b)return 1;if(x>=c)return 0;return(c-x)/(c-b)}if(b===c){if(x<=a)return 0;if(x>=b)return 1;return(x-a)/(b-a)}if(x<=a||x>=c)return 0;if(x===b)return 1;if(x<b)return(x-a)/(b-a);return(c-x)/(c-b)}
+function drawChart(id,o){
+  const svg=document.getElementById(id);if(!svg)return;
+  const W=720,H=300,L=46,R=14,T=12,B=36;
+  const xmin=o.xmin,xmax=o.xmax,ymin=o.ymin??0,ymax=o.ymax??1.1;
+  const sx=x=>L+(x-xmin)/(xmax-xmin)*(W-L-R),sy=y=>H-B-(y-ymin)/(ymax-ymin)*(H-T-B);
+  svg.setAttribute('viewBox',`0 0 ${W} ${H}`);
+  let html='';
+  for(let i=0;i<=5;i++){
+    const x=xmin+(xmax-xmin)*i/5;
+    html+=`<line x1="${sx(x)}" y1="${T}" x2="${sx(x)}" y2="${H-B}" stroke="#e7ecf4"/><text x="${sx(x)}" y="${H-14}" text-anchor="middle" font-size="13" fill="#647087">${fmt(x,0)}</text>`;
+  }
+  for(let i=0;i<=4;i++){
+    const y=ymin+(ymax-ymin)*i/4;
+    html+=`<line x1="${L}" y1="${sy(y)}" x2="${W-R}" y2="${sy(y)}" stroke="#e7ecf4"/><text x="${L-8}" y="${sy(y)+4}" text-anchor="end" font-size="12" fill="#647087">${fmt(y,1)}</text>`;
+  }
+  html+=`<line x1="${L}" y1="${H-B}" x2="${W-R}" y2="${H-B}" stroke="#172033" stroke-width="1.3"/><line x1="${L}" y1="${T}" x2="${L}" y2="${H-B}" stroke="#172033" stroke-width="1.3"/>`;
+  html+=`<text x="${W/2}" y="${H-2}" text-anchor="middle" font-size="13" fill="#647087">${o.xLabel||''}</text>`;
+  (o.curves||[]).forEach(c=>{
+    let pts='';for(let i=0;i<=300;i++){const x=xmin+(xmax-xmin)*i/300;pts+=`${sx(x)},${sy(c.fn(x))} `}
+    if(c.fill)html+=`<polygon points="${sx(xmin)},${sy(0)} ${pts} ${sx(xmax)},${sy(0)}" fill="${c.color}" opacity="${c.opacity||.14}"/>`;
+    html+=`<polyline points="${pts}" fill="none" stroke="${c.color}" stroke-width="${c.width||4}" stroke-linecap="round" stroke-linejoin="round"/>`;
+  });
+  if(o.vline!==undefined&&o.vline!==null)html+=`<line x1="${sx(o.vline)}" y1="${T}" x2="${sx(o.vline)}" y2="${H-B}" stroke="#77849a" stroke-width="2" stroke-dasharray="6 6"/>`;
+  (o.points||[]).forEach(pt=>{
+    html+=`<circle cx="${sx(pt.x)}" cy="${sy(pt.y)}" r="6" fill="${pt.color||'#111'}" stroke="#fff" stroke-width="2"/>`;
+    if(pt.label)html+=`<text x="${sx(pt.x)}" y="${Math.max(14,sy(pt.y)-10)}" text-anchor="middle" font-size="12" font-weight="900" fill="#172033">${pt.label}</text>`;
+  });
+  svg.innerHTML=html;
+}
+function state(hp,dist){
+  const low=trimf(hp,0,0,40),mid=trimf(hp,30,50,70),high=trimf(hp,60,100,100);
+  const close=trimf(dist,0,0,15),far=trimf(dist,10,50,50);
+  const r1=low,r2=Math.min(mid,far),r3=Math.min(mid,close),r4=Math.min(high,close);
+  const none=r4,caut=Math.max(r2,r3),strong=r1;
+  const noneFn=x=>trimf(x,0,0,30),cautFn=x=>trimf(x,50,70,90),strongFn=x=>trimf(x,80,100,100);
+  const yNone=x=>Math.min(noneFn(x),none),yCaut=x=>Math.min(cautFn(x),caut),yStrong=x=>Math.min(strongFn(x),strong);
+  const agg=x=>Math.max(yNone(x),yCaut(x),yStrong(x));
+  let num=0,den=0;for(let x=0;x<=100;x+=.5){const mu=agg(x);num+=x*mu;den+=mu}
+  return{low,mid,high,close,far,r1,r2,r3,r4,none,caut,strong,yNone,yCaut,yStrong,agg,score:den?num/den:0};
+}
+function meaning(score){if(score<15)return'Praktycznie brak ataku';if(score<40)return'Słaby, bardzo ostrożny atak';if(score<65)return'Umiarkowany, ostrożny atak';if(score<85)return'Dość mocny atak';return'Bardzo zdecydowany atak'}
+function update(){
+  const hp=+document.getElementById('hp').value,dist=+document.getElementById('dist').value;
+  document.getElementById('hpVal').textContent=hp;document.getElementById('distVal').textContent=dist;
+  const s=state(hp,dist);
+
+  [['muLow',s.low],['muMid',s.mid],['muHigh',s.high],['muClose',s.close],['muFar',s.far]].forEach(([id,v])=>document.getElementById(id).textContent=fmt(v));
+
+  drawChart('hpChart',{xmin:0,xmax:100,ymax:1.05,xLabel:'HP',curves:[
+    {fn:x=>trimf(x,0,0,40),color:'#ef476f'},{fn:x=>trimf(x,30,50,70),color:'#ff7a00'},{fn:x=>trimf(x,60,100,100),color:'#06a77d'}
+  ],vline:hp,points:[{x:hp,y:s.low,color:'#ef476f',label:fmt(s.low)},{x:hp,y:s.mid,color:'#ff7a00',label:fmt(s.mid)},{x:hp,y:s.high,color:'#06a77d',label:fmt(s.high)}]});
+
+  drawChart('distChart',{xmin:0,xmax:50,ymax:1.05,xLabel:'odległość [bloki]',curves:[
+    {fn:x=>trimf(x,0,0,15),color:'#4b82f0'},{fn:x=>trimf(x,10,50,50),color:'#8f63ff'}
+  ],vline:dist,points:[{x:dist,y:s.close,color:'#4b82f0',label:fmt(s.close)},{x:dist,y:s.far,color:'#8f63ff',label:fmt(s.far)}]});
+
+  drawChart('attackBaseChart',{xmin:0,xmax:100,ymax:1.05,xLabel:'poziom ataku',curves:[
+    {fn:x=>trimf(x,0,0,30),color:'#4b82f0'},{fn:x=>trimf(x,50,70,90),color:'#ff7a00'},{fn:x=>trimf(x,80,100,100),color:'#ef476f'}
+  ]});
+
+  drawChart('aggChart',{xmin:0,xmax:100,ymax:1.05,xLabel:'poziom ataku 0–100',curves:[
+    {fn:s.yNone,color:'#4b82f0',fill:true},{fn:s.yCaut,color:'#ff7a00',fill:true},{fn:s.yStrong,color:'#ef476f',fill:true},{fn:s.agg,color:'#172033',width:5}
+  ],vline:s.score,points:[{x:s.score,y:s.agg(s.score),color:'#06a77d',label:`centroid ${fmt(s.score,1)}`}]});
+
+  const rows=[['R1','zdecydowany',s.r1],['R2','ostrożny',s.r2],['R3','ostrożny',s.r3],['R4','brak',s.r4]];
+  document.getElementById('ruleBody').innerHTML=rows.map(r=>`<tr><td><b>${r[0]}</b></td><td>${r[1]}</td><td>${fmt(r[2])}</td></tr>`).join('');
+
+  document.getElementById('noneAct').textContent=fmt(s.none);document.getElementById('cautAct').textContent=fmt(s.caut);document.getElementById('strongAct').textContent=fmt(s.strong);
+  const score=Math.max(0,Math.min(100,s.score));
+  document.getElementById('centroidText').textContent=fmt(score,1);
+  document.getElementById('gaugeMarker').style.left=score+'%';
+  document.getElementById('decisionText').textContent=meaning(score);
+  document.getElementById('explainCentroid').innerHTML=`Środek ciężkości połączonego wykresu wypada przy <b>${fmt(score,1)}</b>. To końcowy poziom ataku na skali 0–100, nie procent pewności.`;
+
+  [['barNone',s.none],['barCaut',s.caut],['barStrong',s.strong]].forEach(([id,v])=>document.getElementById(id).style.width=(v*100)+'%');
+  document.getElementById('barNoneVal').textContent=fmt(s.none);document.getElementById('barCautVal').textContent=fmt(s.caut);document.getElementById('barStrongVal').textContent=fmt(s.strong);
+}
+function preset(h,d){document.getElementById('hp').value=h;document.getElementById('dist').value=d;update()}
+['hp','dist'].forEach(id=>document.getElementById(id).addEventListener('input',update));
+update();
+</script>
+</body>
+</html>
