@@ -1,0 +1,628 @@
+<!doctype html>
+<html lang="pl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Multinomial Naive Bayes — interaktywne obliczenia</title>
+<style>
+:root{
+  --bg:#080914;
+  --panel:#111421;
+  --text:#f8f9ff;
+  --muted:#c5cadf;
+  --line:rgba(255,255,255,.14);
+  --cyan:#42e8ff;
+  --pink:#ff58d0;
+  --gold:#ffd86d;
+  --lime:#b8ff67;
+  --shadow:0 18px 48px rgba(0,0,0,.31);
+}
+*{box-sizing:border-box}
+html,body{
+  width:100%;
+  height:100%;
+  margin:0;
+  overflow:hidden;
+  color:var(--text);
+  font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;
+  background:
+    radial-gradient(circle at 8% 0%,rgba(66,232,255,.15),transparent 28%),
+    radial-gradient(circle at 92% 0%,rgba(255,88,208,.13),transparent 28%),
+    linear-gradient(145deg,var(--bg),#05050b 68%);
+}
+button,select{font:inherit}
+button{cursor:pointer}
+#stage{
+  position:absolute;
+  left:50%;
+  top:50%;
+  width:1600px;
+  height:900px;
+  transform:translate(-50%,-50%) scale(1);
+  transform-origin:center center;
+  padding:14px;
+  display:grid;
+  grid-template-rows:70px 315px minmax(0,1fr);
+  gap:12px;
+}
+.header{
+  display:grid;
+  grid-template-columns:1fr auto;
+  gap:14px;
+  align-items:center;
+  padding:10px 18px;
+  border:1px solid var(--line);
+  border-radius:24px;
+  background:linear-gradient(145deg,rgba(255,255,255,.10),rgba(255,255,255,.035));
+  box-shadow:var(--shadow)
+}
+.brand{display:flex;align-items:center;gap:14px}
+.logo{
+  width:46px;height:46px;border-radius:16px;
+  display:grid;place-items:center;
+  background:linear-gradient(135deg,var(--cyan),var(--pink));
+  color:#07101b;font-size:23px;font-weight:950
+}
+h1,h2,h3,p{margin:0}
+h1{font-size:25px;letter-spacing:-.04em}
+.subtitle{margin-top:3px;color:var(--muted);font-size:12px}
+.header-badges{display:flex;gap:8px}
+.badge{
+  min-width:104px;padding:9px 13px;
+  border:1px solid var(--line);border-radius:15px;
+  background:rgba(255,255,255,.055);text-align:center
+}
+.badge small{
+  display:block;color:var(--muted);
+  font-size:9px;text-transform:uppercase;letter-spacing:.08em
+}
+.badge strong{display:block;margin-top:2px;font-size:16px}
+.top-grid{
+  min-height:0;
+  display:grid;
+  grid-template-columns:38% minmax(0,62%);
+  gap:12px
+}
+.panel,.calc{
+  min-height:0;
+  border:1px solid var(--line);
+  border-radius:24px;
+  background:linear-gradient(155deg,rgba(255,255,255,.085),rgba(255,255,255,.035));
+  box-shadow:var(--shadow);
+  overflow:hidden
+}
+.panel{padding:16px}
+.kicker{
+  color:var(--cyan);
+  font-size:10px;font-weight:950;
+  letter-spacing:.14em;text-transform:uppercase
+}
+.panel h2,.calc h2{margin-top:3px;font-size:19px;letter-spacing:-.025em}
+label{
+  display:block;margin:13px 0 6px;
+  color:var(--gold);font-size:10px;font-weight:900;
+  letter-spacing:.09em;text-transform:uppercase
+}
+.add-row{display:grid;grid-template-columns:1fr auto;gap:8px}
+select{
+  width:100%;height:40px;padding:0 13px;
+  border:1px solid var(--line);border-radius:14px;
+  background:#171a28;color:#fff;outline:none
+}
+button{
+  min-height:40px;padding:8px 15px;border:0;border-radius:999px;
+  color:#07101b;font-weight:950;
+  background:linear-gradient(135deg,var(--cyan),var(--pink));
+  box-shadow:0 8px 18px rgba(66,232,255,.13)
+}
+button.secondary{
+  color:#fff;background:rgba(255,255,255,.075);
+  border:1px solid var(--line);box-shadow:none
+}
+button:disabled{opacity:.4;cursor:not-allowed}
+.tags{
+  min-height:150px;max-height:150px;margin-top:10px;padding:12px;
+  display:flex;flex-wrap:wrap;align-content:flex-start;gap:8px;
+  border:1px dashed rgba(255,255,255,.22);
+  border-radius:18px;background:rgba(255,255,255,.035);
+  overflow:hidden
+}
+.tag{
+  padding:8px 11px;border-radius:999px;
+  background:rgba(255,88,208,.14);
+  border:1px solid rgba(255,88,208,.32);
+  font-size:12px;font-weight:850;cursor:pointer
+}
+.tag.used{
+  background:rgba(66,232,255,.13);
+  border-color:rgba(66,232,255,.36)
+}
+.tag.current{
+  background:rgba(255,216,109,.19);
+  border-color:rgba(255,216,109,.55);
+  box-shadow:0 0 0 1px var(--gold) inset
+}
+.input-footer{
+  display:flex;justify-content:space-between;align-items:center;gap:10px;margin-top:10px
+}
+.hint{color:var(--muted);font-size:11px}
+.result-head{
+  display:grid;grid-template-columns:1fr auto;gap:12px;align-items:center
+}
+.winner{
+  display:grid;grid-template-columns:54px 1fr auto;gap:12px;align-items:center;
+  min-width:350px;padding:12px 15px;
+  border:1px solid rgba(184,255,103,.29);border-radius:19px;
+  background:linear-gradient(145deg,rgba(184,255,103,.12),rgba(255,255,255,.035))
+}
+.winner-icon{font-size:38px}
+.winner small{
+  display:block;color:var(--muted);
+  font-size:9px;text-transform:uppercase;letter-spacing:.08em
+}
+.winner strong{display:block;font-size:25px}
+.winner-score{font-size:24px;font-weight:950;color:var(--lime)}
+.ranking{margin-top:13px}
+.rank-row{
+  display:grid;grid-template-columns:105px minmax(0,1fr) 70px;
+  gap:10px;align-items:center;margin:10px 0;font-size:12px
+}
+.rank-name{font-weight:900;white-space:nowrap}
+.rank-row.best .rank-name,.rank-row.best .rank-value{color:var(--lime)}
+.rank-value{text-align:right;font-size:13px;font-weight:950;font-variant-numeric:tabular-nums}
+.bar{
+  height:28px;overflow:hidden;border:1px solid var(--line);
+  border-radius:999px;background:rgba(255,255,255,.07)
+}
+.bar i{
+  display:block;height:100%;min-width:3px;border-radius:999px;
+  background:linear-gradient(90deg,var(--cyan),var(--pink));
+  transition:width .35s ease
+}
+.result-note{
+  margin-top:11px;padding:9px 11px;border-radius:15px;
+  border:1px solid rgba(66,232,255,.20);
+  background:rgba(66,232,255,.065);
+  color:var(--muted);font-size:11px
+}
+.calc{
+  padding:14px 16px;
+  display:grid;
+  grid-template-rows:auto auto auto minmax(0,1fr);
+  gap:9px
+}
+.calc-top{
+  display:grid;grid-template-columns:1fr auto;gap:14px;align-items:center
+}
+.step-controls{
+  display:grid;grid-template-columns:auto 110px auto;gap:7px;align-items:center
+}
+.step-count{
+  height:36px;display:grid;place-items:center;
+  border:1px solid var(--line);border-radius:999px;
+  background:rgba(255,255,255,.055);
+  font-size:12px;font-weight:900
+}
+.static-strip{
+  display:grid;
+  grid-template-columns:1.4fr repeat(5,1fr);
+  gap:7px
+}
+.static-formula,.constant{
+  padding:9px 11px;border-radius:15px;
+  border:1px solid rgba(66,232,255,.20);
+  background:rgba(66,232,255,.065)
+}
+.static-formula{
+  font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  font-size:10px;line-height:1.42
+}
+.static-formula strong{color:var(--gold)}
+.constant small{
+  display:block;color:var(--muted);
+  font-size:8px;text-transform:uppercase;letter-spacing:.06em
+}
+.constant strong{display:block;margin-top:3px;font-size:13px}
+.current-step{
+  display:grid;grid-template-columns:1fr 1fr;gap:8px
+}
+.current-box{
+  padding:9px 11px;border:1px solid rgba(255,216,109,.20);
+  border-radius:15px;background:rgba(255,216,109,.065);
+  font-size:11px;line-height:1.4
+}
+.current-box strong{color:var(--gold)}
+.class-grid{
+  min-height:0;
+  display:grid;
+  grid-template-columns:repeat(5,1fr);
+  gap:8px
+}
+.class-card{
+  min-height:0;padding:11px;border:1px solid var(--line);
+  border-radius:17px;background:rgba(255,255,255,.045);
+  display:grid;grid-template-rows:auto auto minmax(0,1fr);gap:8px
+}
+.class-card.best{
+  border-color:rgba(184,255,103,.42);
+  background:rgba(184,255,103,.08)
+}
+.class-head{
+  display:flex;justify-content:space-between;align-items:center;gap:8px
+}
+.class-name{font-size:13px;font-weight:950}
+.class-percent{font-size:13px;color:var(--lime);font-weight:950}
+.dynamic-value{
+  padding:8px 9px;border-radius:13px;
+  border:1px solid rgba(255,255,255,.09);
+  background:rgba(255,255,255,.035)
+}
+.dynamic-value small{
+  display:block;color:var(--muted);
+  font-size:8px;text-transform:uppercase;letter-spacing:.06em
+}
+.dynamic-value strong{display:block;margin-top:3px;font-size:14px}
+.math{
+  min-height:0;display:flex;flex-direction:column;justify-content:center;gap:7px;
+  font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  font-size:10px;line-height:1.42
+}
+.math .line{color:#fff}
+.math .muted{color:var(--muted)}
+.math .sum{
+  padding-top:7px;border-top:1px dashed rgba(255,255,255,.16);
+  color:var(--gold);font-weight:900
+}
+.start-message{
+  grid-column:1/-1;
+  display:grid;place-items:center;
+  border:1px dashed rgba(255,255,255,.20);
+  border-radius:18px;background:rgba(255,255,255,.035);
+  color:var(--muted);font-size:15px;text-align:center
+}
+</style>
+</head>
+<body>
+<div id="stage">
+  <header class="header">
+    <div class="brand">
+      <div class="logo">NB</div>
+      <div>
+        <h1>Multinomial Naive Bayes — jak powstaje predykcja?</h1>
+        <div class="subtitle">Dodaj tagi i przejdź przez obliczenia krok po kroku</div>
+      </div>
+    </div>
+    <div class="header-badges">
+      <div class="badge"><small>model</small><strong>Multinomial NB</strong></div>
+      <div class="badge"><small>accuracy</small><strong id="accuracy"></strong></div>
+    </div>
+  </header>
+
+  <section class="top-grid">
+    <section class="panel">
+      <div class="kicker">1. Dane wejściowe</div>
+      <h2>Wybierz tagi</h2>
+
+      <label>Dodaj tag</label>
+      <div class="add-row">
+        <select id="tagSelect"></select>
+        <button id="addTag">Dodaj</button>
+      </div>
+
+      <div class="tags" id="selectedTags"></div>
+
+    </section>
+
+    <section class="panel">
+      <div class="result-head">
+        <div>
+          <div class="kicker">2. Wynik modelu</div>
+          <h2>Ranking klas</h2>
+        </div>
+        <div class="winner" id="winner"></div>
+      </div>
+
+      <div class="ranking" id="ranking"></div>
+    </section>
+  </section>
+
+  <section class="calc">
+    <div class="calc-top">
+      <div>
+        <div class="kicker">3. Obliczenia</div>
+        <h2>Zmiana wyniku po dodaniu kolejnego tagu</h2>
+      </div>
+
+      <div class="step-controls">
+        <button class="secondary" id="prevStep">←</button>
+        <div class="step-count" id="stepCount"></div>
+        <button id="nextStep">→</button>
+      </div>
+    </div>
+
+    <div class="static-strip">
+      <div class="static-formula">
+        <strong>Wzór:</strong><br>
+        log-score(C) = log P(C) + Σ log P(tagᵢ | C)<br>
+        P(tag | C) = (n(tag,C) + α) / (N(C) + α · V)
+      </div>
+      <div class="constant"><small>P(C)</small><strong>48 / 240 = 0,2</strong></div>
+      <div class="constant"><small>log P(C)</small><strong>−1,6094</strong></div>
+      <div class="constant"><small>N(C)</small><strong>384</strong></div>
+      <div class="constant"><small>V</small><strong>74</strong></div>
+      <div class="constant"><small>α i mianownik</small><strong>1 → 458</strong></div>
+    </div>
+
+    <div class="current-step">
+      <div class="current-box" id="stepDescription"></div>
+      <div class="current-box" id="stepFormula"></div>
+    </div>
+
+    <div class="class-grid" id="classCards"></div>
+  </section>
+</div>
+
+<script>
+const MODEL = {"classes":["cs","fortnite","lol","minecraft","roblox"],"vocab":["aktualizacja","arena","autobus bojowy","awp","baron","battle","biomy","bohaterowie","bomba","brokhaven","budowanie","burza","crafting","creepery","czat","diamenty","drużyna","duety","dust2","dżungla","emotki","esport","event","flash","fortyfikacje","hardcore","karabin","klocki","kolekcje","kopanie","lama","loot","lua","mapa","misje","multiplayer","nether","nexus","obby","oddziały","online","parkour","pistolet","prywatny serwer","przetrwanie","questy","rankedy","rankingi","redstone","robuxy","roleplay","runy","sandbox","sezon","skiny","sklep","slurp","smok","snajper","strzał w głowę","strzelanie","studio","survival","symulator","tickrate","tryb","tryb kreatywny","tryb solo","ulti","v-bucksy","waluta","wydarzenia","wyzwania","zombie"],"classCounts":{"cs":48,"minecraft":48,"lol":48,"roblox":48,"fortnite":48},"tagCounts":{"cs":{"tickrate":21,"arena":5,"tryb kreatywny":4,"roleplay":12,"dust2":16,"parkour":7,"event":7,"kopanie":7,"sezon":9,"emotki":8,"symulator":10,"hardcore":9,"awp":17,"mapa":7,"oddziały":8,"aktualizacja":10,"budowanie":7,"flash":23,"drużyna":4,"bomba":19,"multiplayer":4,"survival":6,"sandbox":3,"loot":5,"waluta":7,"online":4,"wyzwania":3,"rankedy":8,"biomy":3,"snajper":5,"przetrwanie":7,"tryb solo":7,"duety":2,"tryb":7,"battle":4,"sklep":7,"czat":6,"fortyfikacje":8,"skiny":4,"questy":7,"klocki":10,"strzelanie":2,"bohaterowie":6,"kolekcje":5,"wydarzenia":4,"crafting":11,"misje":6,"strzał w głowę":5,"zombie":7,"pistolet":4,"rankingi":2,"karabin":2,"prywatny serwer":3},"fortnite":{"lama":21,"hardcore":5,"waluta":6,"skiny":7,"mapa":6,"v-bucksy":20,"przetrwanie":6,"multiplayer":6,"parkour":5,"sandbox":6,"autobus bojowy":16,"rankedy":11,"emotki":7,"wydarzenia":5,"budowanie":12,"wyzwania":9,"zombie":5,"roleplay":10,"slurp":19,"burza":20,"snajper":6,"survival":7,"rankingi":7,"prywatny serwer":4,"bohaterowie":5,"karabin":8,"czat":5,"fortyfikacje":8,"online":6,"kolekcje":10,"strzelanie":6,"crafting":7,"pistolet":5,"tryb solo":6,"klocki":9,"biomy":3,"battle":3,"esport":6,"kopanie":7,"sezon":7,"loot":5,"questy":4,"duety":5,"tryb":6,"aktualizacja":6,"misje":5,"strzał w głowę":2,"symulator":4,"sklep":5,"event":2,"drużyna":2,"tryb kreatywny":4,"oddziały":2,"arena":5},"lol":{"multiplayer":4,"zombie":4,"wyzwania":5,"baron":19,"online":3,"crafting":5,"prywatny serwer":5,"runy":17,"waluta":7,"fortyfikacje":3,"budowanie":8,"nexus":25,"kopanie":8,"duety":5,"kolekcje":7,"aktualizacja":6,"event":7,"loot":5,"hardcore":9,"ulti":20,"przetrwanie":6,"czat":6,"klocki":9,"tryb solo":6,"emotki":3,"arena":8,"sezon":6,"rankedy":7,"tryb kreatywny":9,"wydarzenia":7,"skiny":4,"roleplay":10,"esport":9,"sklep":10,"biomy":4,"snajper":11,"sandbox":3,"misje":6,"dżungla":15,"mapa":6,"survival":5,"strzelanie":3,"oddziały":7,"bohaterowie":5,"strzał w głowę":7,"questy":9,"battle":4,"karabin":5,"drużyna":4,"symulator":4,"parkour":3,"pistolet":7,"tryb":3,"rankingi":1},"minecraft":{"budowanie":8,"rankingi":8,"snajper":6,"diamenty":23,"creepery":20,"arena":7,"aktualizacja":7,"multiplayer":5,"tryb":4,"sklep":5,"tryb solo":7,"crafting":9,"smok":19,"bohaterowie":8,"przetrwanie":6,"rankedy":6,"symulator":9,"esport":9,"waluta":6,"sandbox":6,"roleplay":7,"strzał w głowę":5,"strzelanie":6,"kopanie":4,"duety":6,"wydarzenia":5,"karabin":7,"zombie":6,"loot":6,"redstone":18,"battle":7,"fortyfikacje":9,"nether":16,"emotki":7,"mapa":6,"misje":3,"kolekcje":7,"sezon":7,"skiny":7,"pistolet":7,"tryb kreatywny":10,"survival":5,"parkour":4,"drużyna":1,"questy":4,"prywatny serwer":2,"oddziały":4,"online":4,"biomy":7,"hardcore":2,"klocki":6,"czat":3,"wyzwania":5,"event":3},"roblox":{"robuxy":23,"lua":21,"pistolet":9,"oddziały":13,"misje":5,"waluta":9,"online":3,"survival":5,"emotki":12,"przetrwanie":3,"skiny":6,"obby":15,"strzelanie":11,"loot":11,"sandbox":8,"brokhaven":21,"sklep":6,"arena":6,"rankedy":3,"aktualizacja":4,"parkour":9,"budowanie":7,"fortyfikacje":4,"kopanie":6,"sezon":7,"drużyna":3,"klocki":5,"hardcore":6,"battle":3,"tryb":2,"strzał w głowę":7,"questy":6,"studio":16,"duety":7,"symulator":8,"esport":5,"prywatny serwer":9,"snajper":5,"biomy":6,"bohaterowie":4,"roleplay":5,"crafting":6,"czat":5,"tryb kreatywny":6,"mapa":4,"karabin":8,"wydarzenia":6,"zombie":4,"event":2,"multiplayer":3,"rankingi":6,"tryb solo":4,"kolekcje":2,"wyzwania":4}},"totalTags":{"cs":384,"minecraft":384,"lol":384,"roblox":384,"fortnite":384},"totalRecords":240,"trainSize":240,"testSize":60,"accuracy":1.0,"alpha":1.0,"defaultTags":["robuxy","lua","parkour"]};
+const ICONS = {minecraft:"⛏️",fortnite:"🚌",roblox:"🧱",lol:"🧙",cs:"🎯"};
+const $ = selector => document.querySelector(selector);
+
+const state = {
+  tags:[...MODEL.defaultTags],
+  step:MODEL.defaultTags.length
+};
+
+function fitStage(){
+  const designWidth = 1600;
+  const designHeight = 900;
+  const margin = 10;
+  const scale = Math.min(
+    (window.innerWidth-margin*2)/designWidth,
+    (window.innerHeight-margin*2)/designHeight
+  );
+
+  $("#stage").style.transform =
+    `translate(-50%,-50%) scale(${Math.max(0.45,scale)})`;
+}
+
+function escapeHtml(value){
+  return String(value)
+    .replaceAll("&","&amp;")
+    .replaceAll("<","&lt;")
+    .replaceAll(">","&gt;")
+    .replaceAll('"',"&quot;");
+}
+
+function fmt(value,digits=6){
+  if(!Number.isFinite(value)) return "—";
+  if(Math.abs(value)>0 && Math.abs(value)<0.000001){
+    return value.toExponential(2);
+  }
+  return value.toLocaleString("pl-PL",{maximumFractionDigits:digits});
+}
+
+function classPrior(className){
+  return MODEL.classCounts[className]/MODEL.totalRecords;
+}
+
+function denominator(){
+  return 458;
+}
+
+function tagCount(className,tag){
+  return (MODEL.tagCounts[className]||{})[tag]||0;
+}
+
+function tagProbability(className,tag){
+  return (tagCount(className,tag)+MODEL.alpha)/denominator();
+}
+
+function scoreClass(className,tags){
+  let score=Math.log(classPrior(className));
+
+  for(const tag of tags){
+    if(!MODEL.vocab.includes(tag)) continue;
+    score+=Math.log(tagProbability(className,tag));
+  }
+
+  return score;
+}
+
+function classify(tags){
+  const logs={};
+  MODEL.classes.forEach(className=>{
+    logs[className]=scoreClass(className,tags);
+  });
+
+  const maxLog=Math.max(...Object.values(logs));
+  const exp={};
+  let sum=0;
+
+  Object.entries(logs).forEach(([className,logScore])=>{
+    exp[className]=Math.exp(logScore-maxLog);
+    sum+=exp[className];
+  });
+
+  const ranking=MODEL.classes.map(className=>({
+    className,
+    logScore:logs[className],
+    probability:exp[className]/sum
+  })).sort((a,b)=>b.logScore-a.logScore);
+
+  return {ranking,winner:ranking[0]};
+}
+
+function usedTags(){
+  return state.tags.slice(0,state.step);
+}
+
+function addTag(){
+  const tag=$("#tagSelect").value;
+
+  if(!tag||state.tags.includes(tag)) return;
+
+  if(state.tags.length>=8){
+    alert("Dodaj maksymalnie 8 tagów.");
+    return;
+  }
+
+  state.tags.push(tag);
+  state.step=state.tags.length;
+  render();
+}
+
+function removeTag(tag){
+  state.tags=state.tags.filter(item=>item!==tag);
+  state.step=Math.min(state.step,state.tags.length);
+  render();
+}
+
+function renderTags(){
+  $("#selectedTags").innerHTML=state.tags.length
+    ? state.tags.map((tag,index)=>`
+        <span class="tag ${index<state.step?"used":""} ${index===state.step-1?"current":""}"
+              data-tag="${encodeURIComponent(tag)}">
+          ${escapeHtml(tag)} ×
+        </span>`).join("")
+    : `<span style="color:var(--muted);font-size:12px">Dodaj tagi, aby rozpocząć.</span>`;
+
+  document.querySelectorAll(".tag").forEach(element=>{
+    element.addEventListener("click",()=>{
+      removeTag(decodeURIComponent(element.dataset.tag));
+    });
+  });
+}
+
+function renderResult(){
+  const result=classify(usedTags());
+  const winner=result.winner;
+
+  $("#winner").innerHTML=`
+    <div class="winner-icon">${ICONS[winner.className]}</div>
+    <div>
+      <small>prowadzi</small>
+      <strong>${escapeHtml(winner.className)}</strong>
+    </div>
+    <div class="winner-score">${(winner.probability*100).toFixed(2)}%</div>`;
+
+  $("#ranking").innerHTML=result.ranking.map((item,index)=>`
+    <div class="rank-row ${index===0?"best":""}">
+      <div class="rank-name">${ICONS[item.className]} ${escapeHtml(item.className)}</div>
+      <div class="bar">
+        <i style="width:${Math.max(2,item.probability*100)}%"></i>
+      </div>
+      <div class="rank-value">${(item.probability*100).toFixed(2)}%</div>
+    </div>`).join("");
+
+
+}
+
+function renderCalculations(){
+  $("#stepCount").textContent=`${state.step} / ${state.tags.length}`;
+  $("#prevStep").disabled=state.step===0;
+  $("#nextStep").disabled=state.step===state.tags.length;
+
+  if(state.step===0){
+    $("#stepDescription").innerHTML=
+      `<strong>Krok 0:</strong> nie dodano jeszcze żadnego tagu.`;
+
+    $("#stepFormula").innerHTML=
+      `<strong>Wynik startowy każdej klasy:</strong>
+       log-score(C) = log(0,2) = −1,6094`;
+
+    $("#classCards").innerHTML=`
+      <div class="start-message">
+        Wszystkie klasy rozpoczynają od identycznego wyniku.<br>
+        Dodaj pierwszy tag, aby zobaczyć różnice.
+      </div>`;
+    return;
+  }
+
+  const currentTag=state.tags[state.step-1];
+  const previousTags=state.tags.slice(0,state.step-1);
+  const result=classify(usedTags());
+
+  $("#stepDescription").innerHTML=
+    `<strong>Bieżący tag:</strong> ${escapeHtml(currentTag)}<br>
+     Każda klasa ma inną wartość n(tag,C).`;
+
+  $("#stepFormula").innerHTML=
+    `<strong>W tym kroku zmienia się tylko:</strong>
+     n(tag,C), P(tag | C), log(P) oraz nowy log-score.`;
+
+  $("#classCards").innerHTML=MODEL.classes.map(className=>{
+    const item=result.ranking.find(entry=>entry.className===className);
+    const count=tagCount(className,currentTag);
+    const probability=tagProbability(className,currentTag);
+    const logValue=Math.log(probability);
+    const previousScore=scoreClass(className,previousTags);
+    const newScore=item.logScore;
+
+    return `
+      <div class="class-card ${className===result.winner.className?"best":""}">
+        <div class="class-head">
+          <div class="class-name">${ICONS[className]} ${escapeHtml(className)}</div>
+          <div class="class-percent">${(item.probability*100).toFixed(2)}%</div>
+        </div>
+
+        <div class="dynamic-value">
+          <small>n(${escapeHtml(currentTag)}, ${escapeHtml(className)})</small>
+          <strong>${count} wystąpień</strong>
+        </div>
+
+        <div class="math">
+          <div class="line">
+            P = (${count} + 1) / 458 = ${fmt(probability,6)}
+          </div>
+          <div class="muted">
+            log(P) = ${logValue.toFixed(4)}
+          </div>
+          <div class="sum">
+            ${previousScore.toFixed(4)} + ${logValue.toFixed(4)}
+            = ${newScore.toFixed(4)}
+          </div>
+        </div>
+      </div>`;
+  }).join("");
+}
+
+function render(){
+  renderTags();
+  renderResult();
+  renderCalculations();
+}
+
+$("#accuracy").textContent=(MODEL.accuracy*100).toFixed(0)+"%";
+
+$("#tagSelect").innerHTML=MODEL.vocab
+  .map(tag=>`<option value="${escapeHtml(tag)}">${escapeHtml(tag)}</option>`)
+  .join("");
+
+$("#addTag").addEventListener("click",addTag);
+$("#prevStep").addEventListener("click",()=>{
+  state.step=Math.max(0,state.step-1);
+  render();
+});
+$("#nextStep").addEventListener("click",()=>{
+  state.step=Math.min(state.tags.length,state.step+1);
+  render();
+});
+
+document.addEventListener("keydown",event=>{
+  if(event.key==="ArrowLeft"){
+    state.step=Math.max(0,state.step-1);
+    render();
+  }
+  if(event.key==="ArrowRight"){
+    state.step=Math.min(state.tags.length,state.step+1);
+    render();
+  }
+});
+
+window.addEventListener("resize",fitStage);
+
+fitStage();
+render();
+</script>
+</body>
+</html>
